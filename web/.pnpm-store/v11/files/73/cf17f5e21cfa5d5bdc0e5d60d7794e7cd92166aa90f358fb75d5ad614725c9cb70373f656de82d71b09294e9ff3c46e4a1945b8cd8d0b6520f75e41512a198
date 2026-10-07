@@ -1,0 +1,21 @@
+'use strict';
+
+const content = require('nuxtseo-shared/content');
+const zod = require('zod');
+
+const { defineSchema, asCollection, schema } = content.createContentSchemaFactory({
+  fieldName: "ogImage",
+  label: "og-image",
+  docsUrl: "https://nuxtseo.com/og-image/integrations/content",
+  buildSchema: (_z) => _z.object({
+    url: _z.string().optional(),
+    component: _z.string().optional(),
+    props: _z.record(_z.string(), _z.any())
+  }).optional()
+}, zod.z);
+const ogImageSchema = schema.shape.ogImage;
+
+exports.asOgImageCollection = asCollection;
+exports.defineOgImageSchema = defineSchema;
+exports.ogImageSchema = ogImageSchema;
+exports.schema = schema;

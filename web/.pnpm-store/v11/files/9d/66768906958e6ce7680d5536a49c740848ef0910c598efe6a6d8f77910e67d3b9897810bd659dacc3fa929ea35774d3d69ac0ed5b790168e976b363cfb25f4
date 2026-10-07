@@ -1,0 +1,80 @@
+import { PhoneNumberFormat } from 'awesome-phonenumber';
+import { PropType } from 'vue';
+import { VPhoneInputCountryObject, VPhoneInputMessage } from '../types.ts';
+/**
+ * Make phone input messages composable properties definition.
+ *
+ * @internal
+ */
+export default function makePhoneInputMessagesProps<Country extends VPhoneInputCountryObject>(): {
+    /**
+     * Format example phone.
+     *
+     * @remarks
+     * Using `null` will disable formating example phone numbers.
+     *
+     * @defaultValue
+     * `displayFormat` value if available, `'national'` otherwise.
+     */
+    readonly exampleFormat: {
+        readonly type: PropType<PhoneNumberFormat | null>;
+    };
+    /**
+     * Customize the phone input example.
+     *
+     * @defaultValue
+     * Use `awesome-phonenumber` package's `getExample` function with current country.
+     */
+    readonly example: {
+        readonly type: PropType<VPhoneInputMessage<Country, undefined, undefined>>;
+    };
+    /**
+     * Customize the phone input label.
+     *
+     * @defaultValue
+     * `'Phone'`
+     */
+    readonly label: {
+        readonly type: PropType<VPhoneInputMessage<Country, undefined>>;
+    };
+    /**
+     * Customize the phone input `aria-label`.
+     */
+    readonly ariaLabel: {
+        readonly type: PropType<VPhoneInputMessage<Country, undefined> | null>;
+    };
+    /**
+     * Customize the country input label.
+     *
+     * @defaultValue
+     * `'Country for <label>'` when using the composable, `null` otherwise.
+     */
+    readonly countryLabel: {
+        readonly type: PropType<VPhoneInputMessage<Country> | null>;
+    };
+    /**
+     * Customize the country input `aria-label`.
+     *
+     * @defaultValue
+     * `'Country for <label>'` when using the component, `null` otherwise.
+     */
+    readonly countryAriaLabel: {
+        readonly type: PropType<VPhoneInputMessage<Country> | null>;
+    };
+    /**
+     * Customize the phone input placeholder.
+     */
+    readonly placeholder: {
+        readonly type: PropType<VPhoneInputMessage<Country> | null>;
+    };
+    /**
+     * Customize the phone input invalid message returned by the
+     * `validate` function generated rule.
+     *
+     * @defaultValue
+     * `'The "<label>" field is not a valid phone number (example: <example>).'`
+     */
+    readonly invalidMessage: {
+        readonly type: PropType<VPhoneInputMessage<Country> | null>;
+    };
+};

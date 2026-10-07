@@ -1,0 +1,287 @@
+import { resolveSitePath } from "nuxt-site-config/urls";
+import { joinURL, withHttps } from "ufo";
+import { getHeader } from "#nuxtseo/h3";
+import { defineCachedFunction, useRuntimeConfig } from "#nuxtseo/nitro";
+import staticConfig from "#sitemap-virtual/static-config.mjs";
+import { applyDynamicParams, createPathFilter, findPageMapping, logger, resolveI18nSitemapLocaleKey, splitForLocales } from "../../../utils-pure.js";
+import { preNormalizeEntry } from "../urlset/normalise.js";
+import { sortInPlace } from "../urlset/sort.js";
+import { childSitemapSources, globalSitemapSources, resolveSitemapSources } from "../urlset/sources.js";
+import { parseChunkInfo, sliceUrlsForChunk } from "../utils/chunk.js";
+const SERVER_CACHE_MAX_AGE = staticConfig.cacheMaxAgeSeconds || 60 * 10;
+export function resolveSitemapEntries(sitemap, urls, runtimeConfig, resolvers, baseURL) {
+  const {
+    autoI18n,
+    isI18nMapped
+  } = runtimeConfig;
+  const hasFilters = !!sitemap.include?.length || !!sitemap.exclude?.length;
+  const filterPath = hasFilters ? createPathFilter({
+    include: sitemap.include,
+    exclude: sitemap.exclude
+  }, baseURL || "/") : void 0;
+  const _urls = [];
+  for (const _e of urls) {
+    const e = preNormalizeEntry(_e, resolvers);
+    if (e.loc && (!filterPath || filterPath(e.loc, e._path?.pathname)))
+      _urls.push(e);
+  }
+  const withoutPrefixPaths = {};
+  if (autoI18n && autoI18n.strategy !== "no_prefix") {
+    const localeCodes = new Set(autoI18n.locales.map((l) => l.code));
+    const localeByCode = new Map(autoI18n.locales.map((l) => [l.code, l]));
+    const isPrefixStrategy = autoI18n.strategy === "prefix";
+    const isPrefixExceptOrAndDefault = autoI18n.strategy === "prefix_and_default" || autoI18n.strategy === "prefix_except_default";
+    const xDefaultAndLocales = [{ code: "x-default", _hreflang: "x-default" }, ...autoI18n.locales];
+    const defaultLocale = autoI18n.defaultLocale;
+    const hasPages = !!autoI18n.pages;
+    const sortedPageKeys = hasPages ? Object.keys(autoI18n.pages).sort((a, b) => b.length - a.length) : void 0;
+    const hasDifferentDomains = !!autoI18n.differentDomains;
+    const validI18nUrlsForTransform = [];
+    for (let i = 0; i < _urls.length; i++) {
+      const _e = _urls[i];
+      if (_e._abs)
+        continue;
+      const split = splitForLocales(_e._relativeLoc, localeCodes);
+      let localeCode = split[0];
+      const pathWithoutPrefix = split[1];
+      if (!localeCode)
+        localeCode = defaultLocale;
+      const e = _e;
+      e._pathWithoutPrefix = pathWithoutPrefix;
+      const locale = localeByCode.get(localeCode);
+      if (!locale)
+        continue;
+      e._locale = locale;
+      e._index = i;
+      e._key = `${e._sitemap || ""}${e._path?.pathname || "/"}${e._path?.search || ""}`;
+      withoutPrefixPaths[pathWithoutPrefix] = withoutPrefixPaths[pathWithoutPrefix] || [];
+      if (!withoutPrefixPaths[pathWithoutPrefix].some((e2) => e2._locale.code === locale.code))
+        withoutPrefixPaths[pathWithoutPrefix].push(e);
+      validI18nUrlsForTransform.push(e);
+    }
+    for (const e of validI18nUrlsForTransform) {
+      if (!e._i18nTransform && !e.alternatives?.length) {
+        const alternatives = [];
+        for (const u of withoutPrefixPaths[e._pathWithoutPrefix] || []) {
+          if (u._locale.code === defaultLocale) {
+            alternatives.push({
+              href: u.loc,
+              hreflang: "x-default"
+            });
+          }
+          alternatives.push({
+            href: u.loc,
+            hreflang: u._locale._hreflang || defaultLocale
+          });
+        }
+        if (alternatives.length)
+          e.alternatives = alternatives;
+      } else if (e._i18nTransform) {
+        delete e._i18nTransform;
+        if (hasDifferentDomains) {
+          const defLocale = localeByCode.get(defaultLocale);
+          e.alternatives = [
+            {
+              ...defLocale,
+              code: "x-default"
+            },
+            ...autoI18n.locales.filter((l) => !!l.domain)
+          ].map((locale) => {
+            return {
+              hreflang: locale._hreflang,
+              href: joinURL(withHttps(locale.domain), e._pathWithoutPrefix)
+            };
+          });
+        } else {
+          const pageMatch = hasPages ? findPageMapping(e._pathWithoutPrefix, autoI18n.pages, sortedPageKeys) : null;
+          const pathSearch = e._path?.search || "";
+          const pathWithoutPrefix = e._pathWithoutPrefix;
+          for (const l of autoI18n.locales) {
+            let loc = pathWithoutPrefix;
+            if (pageMatch && pageMatch.mappings[l.code] !== void 0) {
+              const customPath = pageMatch.mappings[l.code];
+              if (customPath === false)
+                continue;
+              if (typeof customPath === "string") {
+                loc = customPath[0] === "/" ? customPath : `/${customPath}`;
+                loc = applyDynamicParams(loc, pageMatch.paramSegments);
+                if (isPrefixStrategy || isPrefixExceptOrAndDefault && l.code !== defaultLocale)
+                  loc = joinURL(`/${l.code}`, loc);
+              }
+            } else if (!hasDifferentDomains && !(isPrefixExceptOrAndDefault && l.code === defaultLocale)) {
+              loc = joinURL(`/${l.code}`, pathWithoutPrefix);
+            }
+            const _sitemap = isI18nMapped ? l._sitemap : void 0;
+            const alternatives = [];
+            for (const locale of xDefaultAndLocales) {
+              const code = locale.code === "x-default" ? defaultLocale : locale.code;
+              const isDefault = locale.code === "x-default" || locale.code === defaultLocale;
+              let href = pathWithoutPrefix;
+              if (pageMatch && pageMatch.mappings[code] !== void 0) {
+                const customPath = pageMatch.mappings[code];
+                if (customPath === false)
+                  continue;
+                if (typeof customPath === "string") {
+                  href = customPath[0] === "/" ? customPath : `/${customPath}`;
+                  href = applyDynamicParams(href, pageMatch.paramSegments);
+                  if (isPrefixStrategy || isPrefixExceptOrAndDefault && !isDefault)
+                    href = joinURL("/", code, href);
+                }
+              } else if (isPrefixStrategy) {
+                href = joinURL("/", code, pathWithoutPrefix);
+              } else if (isPrefixExceptOrAndDefault && !isDefault) {
+                href = joinURL("/", code, pathWithoutPrefix);
+              }
+              if (filterPath && !filterPath(href))
+                continue;
+              alternatives.push({
+                hreflang: locale._hreflang,
+                href
+              });
+            }
+            const { _index: _, ...rest } = e;
+            const newEntry = preNormalizeEntry({
+              _sitemap,
+              ...rest,
+              _key: `${_sitemap || ""}${loc || "/"}${pathSearch}`,
+              _locale: l,
+              loc,
+              alternatives
+            }, resolvers);
+            if (e._locale.code === newEntry._locale.code) {
+              _urls[e._index] = newEntry;
+              e._index = void 0;
+            } else {
+              _urls.push(newEntry);
+            }
+          }
+        }
+      }
+      if (isI18nMapped) {
+        e._sitemap = e._sitemap || e._locale._sitemap;
+        e._key = `${e._sitemap || ""}${e.loc || "/"}${e._path?.search || ""}`;
+      }
+      if (e._index)
+        _urls[e._index] = e;
+    }
+  }
+  return _urls;
+}
+export async function buildResolvedSitemapUrls(effectiveSitemap, matchName, isChunked, resolvers, runtimeConfig, nitro) {
+  const { sitemaps, autoI18n, isI18nMapped, isMultiSitemap, sortEntries } = runtimeConfig;
+  let sourcesInput = effectiveSitemap.includeAppSources ? [...await globalSitemapSources(), ...await childSitemapSources(effectiveSitemap)] : await childSitemapSources(effectiveSitemap);
+  if (nitro && resolvers.event) {
+    const ctx = {
+      event: resolvers.event,
+      sitemapName: matchName,
+      sources: sourcesInput
+    };
+    await nitro.hooks.callHook("sitemap:sources", ctx);
+    sourcesInput = ctx.sources;
+  }
+  const sources = await resolveSitemapSources(sourcesInput, resolvers.event);
+  const failedSources = sources.filter((source) => source.error && source._isFailure).map((source) => ({
+    url: typeof source.fetch === "string" ? source.fetch : source.fetch?.[0] || "unknown",
+    error: source.error || "Unknown error"
+  }));
+  const resolvedCtx = {
+    urls: sources.flatMap((s) => s.urls),
+    sitemapName: matchName,
+    event: resolvers.event
+  };
+  await nitro?.hooks.callHook("sitemap:input", resolvedCtx);
+  const enhancedUrls = resolveSitemapEntries(effectiveSitemap, resolvedCtx.urls, { autoI18n, isI18nMapped }, resolvers, useRuntimeConfig().app.baseURL);
+  const localeSitemapKeys = isI18nMapped && autoI18n ? autoI18n.locales.map((l) => l._sitemap) : [];
+  if (isMultiSitemap) {
+    const sitemapNames = Object.keys(sitemaps).filter((k) => k !== "index");
+    const validSitemapNames = new Set(sitemapNames);
+    if (isI18nMapped) {
+      for (const name of sitemapNames) {
+        const localeKey = resolveI18nSitemapLocaleKey(name, localeSitemapKeys);
+        if (localeKey)
+          validSitemapNames.add(localeKey);
+      }
+    }
+    const warnedSitemaps = nitro?._sitemapWarnedSitemaps || /* @__PURE__ */ new Set();
+    for (const e of enhancedUrls) {
+      const hasMatchingSitemap = typeof e._sitemap === "string" && validSitemapNames.has(e._sitemap);
+      if (typeof e._sitemap === "string" && !hasMatchingSitemap) {
+        if (!warnedSitemaps.has(e._sitemap)) {
+          warnedSitemaps.add(e._sitemap);
+          logger.error(`Sitemap \`${e._sitemap}\` not found in sitemap config. Available sitemaps: ${sitemapNames.join(", ")}. Entry \`${e.loc}\` will be omitted.`);
+        }
+      }
+    }
+    if (nitro) {
+      nitro._sitemapWarnedSitemaps = warnedSitemaps;
+    }
+  }
+  const matchedLocaleSitemap = isI18nMapped ? resolveI18nSitemapLocaleKey(matchName, localeSitemapKeys) : null;
+  const filteredUrls = enhancedUrls.filter((e) => {
+    if (e._sitemap === false)
+      return false;
+    if (isMultiSitemap && e._sitemap && matchName) {
+      if (isChunked)
+        return e._sitemap === matchName;
+      if (e._sitemap === matchName)
+        return true;
+      if (isI18nMapped)
+        return e._sitemap === matchedLocaleSitemap;
+      return false;
+    }
+    return true;
+  });
+  const urls = sortEntries ? sortInPlace(filteredUrls) : filteredUrls;
+  return { urls, failedSources };
+}
+export const buildResolvedSitemapUrlsCached = defineCachedFunction(
+  async (_event, effectiveSitemap, matchName, isChunked, resolvers, runtimeConfig, nitro) => buildResolvedSitemapUrls(effectiveSitemap, matchName, isChunked, resolvers, runtimeConfig, nitro),
+  {
+    name: "sitemap:resolved-urls",
+    group: "sitemap",
+    base: "sitemap",
+    maxAge: SERVER_CACHE_MAX_AGE,
+    getKey: (event, _effectiveSitemap, matchName, isChunked) => {
+      const host = getHeader(event, "host") || getHeader(event, "x-forwarded-host") || "";
+      const proto = getHeader(event, "x-forwarded-proto") || "https";
+      return `resolved-${isChunked ? "chunked-" : ""}${matchName}-${proto}-${host}`;
+    },
+    swr: true
+  }
+);
+export async function getResolvedSitemapUrls(effectiveSitemap, matchName, isChunked, resolvers, runtimeConfig, nitro) {
+  const event = resolvers.event;
+  const shouldCache = !import.meta.dev && !import.meta.prerender && typeof runtimeConfig.cacheMaxAgeSeconds === "number" && runtimeConfig.cacheMaxAgeSeconds > 0;
+  if (shouldCache && event) {
+    return buildResolvedSitemapUrlsCached(event, effectiveSitemap, matchName, isChunked, resolvers, runtimeConfig, nitro);
+  }
+  return buildResolvedSitemapUrls(effectiveSitemap, matchName, isChunked, resolvers, runtimeConfig, nitro);
+}
+export async function buildSitemapUrls(sitemap, resolvers, runtimeConfig, nitro) {
+  const { sitemaps, autoI18n, defaultSitemapsChunkSize } = runtimeConfig;
+  const chunkSize = defaultSitemapsChunkSize || void 0;
+  const chunkInfo = parseChunkInfo(sitemap.sitemapName, sitemaps, chunkSize);
+  if (autoI18n?.differentDomains) {
+    const domain = autoI18n.locales.find((e) => e.language === sitemap.sitemapName || e.code === sitemap.sitemapName)?.domain;
+    if (domain) {
+      const _tester = resolvers.canonicalUrlResolver;
+      resolvers.canonicalUrlResolver = (path) => resolveSitePath(path, {
+        absolute: true,
+        withBase: false,
+        siteUrl: withHttps(domain),
+        trailingSlash: _tester("/test/").endsWith("/"),
+        base: "/"
+      });
+    }
+  }
+  let effectiveSitemap = sitemap;
+  const baseSitemapName = chunkInfo.baseSitemapName;
+  if (chunkInfo.isChunked && baseSitemapName !== sitemap.sitemapName && sitemaps[baseSitemapName]) {
+    effectiveSitemap = sitemaps[baseSitemapName];
+  }
+  const matchName = chunkInfo.isChunked ? baseSitemapName : sitemap.sitemapName;
+  const resolved = await getResolvedSitemapUrls(effectiveSitemap, matchName, chunkInfo.isChunked, resolvers, runtimeConfig, nitro);
+  const urls = sliceUrlsForChunk(resolved.urls, sitemap.sitemapName, sitemaps, chunkSize);
+  return { urls, failedSources: resolved.failedSources };
+}
+export { urlsToXml, urlsToXmlStream } from "./xml.js";

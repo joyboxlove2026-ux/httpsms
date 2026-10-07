@@ -1,0 +1,20 @@
+import type { AutoI18nConfig, ModuleRuntimeConfig, NitroUrlResolvers, ResolvedSitemapUrl, SitemapDefinition, SitemapUrlInput } from '../../../types.js';
+type NitroApp = ReturnType<typeof import('#nuxtseo/nitro').useNitroApp>;
+export interface NormalizedI18n extends ResolvedSitemapUrl {
+    _pathWithoutPrefix: string;
+    _locale: AutoI18nConfig['locales'][number];
+    _index?: number;
+}
+export declare function resolveSitemapEntries(sitemap: SitemapDefinition, urls: SitemapUrlInput[], runtimeConfig: Pick<ModuleRuntimeConfig, 'autoI18n' | 'isI18nMapped'>, resolvers?: NitroUrlResolvers, baseURL?: string): ResolvedSitemapUrl[];
+export interface ResolvedSitemapUrlsResult {
+    urls: ResolvedSitemapUrl[];
+    failedSources: Array<{
+        url: string;
+        error: string;
+    }>;
+}
+export declare function buildResolvedSitemapUrls(effectiveSitemap: SitemapDefinition, matchName: string, isChunked: boolean, resolvers: NitroUrlResolvers, runtimeConfig: ModuleRuntimeConfig, nitro?: NitroApp): Promise<ResolvedSitemapUrlsResult>;
+export declare const buildResolvedSitemapUrlsCached: any;
+export declare function getResolvedSitemapUrls(effectiveSitemap: SitemapDefinition, matchName: string, isChunked: boolean, resolvers: NitroUrlResolvers, runtimeConfig: ModuleRuntimeConfig, nitro?: NitroApp): Promise<ResolvedSitemapUrlsResult>;
+export declare function buildSitemapUrls(sitemap: SitemapDefinition, resolvers: NitroUrlResolvers, runtimeConfig: ModuleRuntimeConfig, nitro?: NitroApp): Promise<ResolvedSitemapUrlsResult>;
+export { urlsToXml, urlsToXmlStream } from './xml.js';

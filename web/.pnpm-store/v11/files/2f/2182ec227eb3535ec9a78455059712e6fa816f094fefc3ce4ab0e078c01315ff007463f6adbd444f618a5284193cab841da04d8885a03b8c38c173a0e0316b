@@ -1,0 +1,39 @@
+'use strict';
+
+require('node:crypto');
+require('node:fs');
+require('node:fs/promises');
+require('node:url');
+require('@nuxt/kit');
+require('defu');
+require('fnv1a-64');
+require('nuxt-site-config/kit');
+require('nuxtseo-shared/kit');
+require('pathe');
+require('pkg-types');
+require('std-env');
+const module$1 = require('./shared/nuxt-og-image.CdpC3njh.cjs');
+require('../dist/runtime/logger.js');
+require('oxc-walker');
+require('chrome-launcher');
+require('nypm');
+require('nuxtseo-shared/devtools');
+require('unstorage');
+require('unstorage/drivers/fs-lite');
+require('../dist/runtime/server/og-image/utils/css.js');
+require('magic-string');
+require('strip-literal');
+require('ufo');
+require('unplugin');
+require('@vue/compiler-sfc');
+require('ofetch');
+require('ultrahtml');
+require('../dist/runtime/server/og-image/core/transforms/emojis/emoji-utils.js');
+require('exsolve');
+require('./shared/nuxt-og-image.CMYbz66P.cjs');
+require('magicast');
+require('magicast/helpers');
+
+
+
+module.exports = module$1.module;

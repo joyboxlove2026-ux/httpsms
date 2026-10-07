@@ -1,0 +1,13 @@
+import { VAutocomplete } from 'vuetify/components';
+/**
+ * Properties to pass to use a `VAutocomplete` country input for `VPhoneInput`.
+ */
+declare const _default: {
+    countryInputComponent: typeof VAutocomplete;
+    countryInputComponentProps: {
+        filterKeys: string[];
+        autocomplete: string;
+        "aria-autocomplete": string;
+    };
+};
+export default _default;

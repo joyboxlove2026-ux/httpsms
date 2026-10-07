@@ -1,0 +1,11 @@
+import * as unhead_types from 'unhead/types';
+import { M as MetaInput } from './schema-org.DP3Hfenn.js';
+
+interface PluginSchemaOrgOptions {
+    minify?: boolean;
+    trailingSlash?: boolean;
+}
+declare function UnheadSchemaOrg(config?: MetaInput, meta?: () => Partial<MetaInput>, options?: PluginSchemaOrgOptions): unhead_types.HeadPluginInput;
+
+export { UnheadSchemaOrg as U };
+export type { PluginSchemaOrgOptions as P };

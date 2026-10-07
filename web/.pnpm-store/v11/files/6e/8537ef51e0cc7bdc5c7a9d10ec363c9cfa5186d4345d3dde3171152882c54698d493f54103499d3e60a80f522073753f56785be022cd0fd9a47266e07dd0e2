@@ -1,0 +1,9 @@
+import { VPhoneInputCountryComposable, VPhoneInputCountryComposableOptions, VPhoneInputCountryObject } from '../types';
+/**
+ * Composable to manage phone input countries.
+ *
+ * @param options
+ *
+ * @internal
+ */
+export default function usePhoneInputCountries<Country extends VPhoneInputCountryObject = VPhoneInputCountryObject>(options: VPhoneInputCountryComposableOptions<Country>): VPhoneInputCountryComposable<Country>;

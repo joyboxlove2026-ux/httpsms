@@ -1,0 +1,9 @@
+import { makeVTextFieldProps } from 'vuetify/lib/components/VTextField/VTextField.js';
+import { VPhoneCountryInputComponent, VPhoneInputCountryObject } from '../types.ts';
+import { default as makePhoneInputProps } from './makePhoneInputProps.ts';
+/**
+ * Make phone input properties definition, with inherited `VTextField` props.
+ *
+ * @internal
+ */
+export default function makePhoneInputCompleteProps<Country extends VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent>(): Omit<ReturnType<typeof makeVTextFieldProps>, keyof ReturnType<typeof makePhoneInputProps<Country, CountryInputComponent>>> & ReturnType<typeof makePhoneInputProps<Country, CountryInputComponent>>;

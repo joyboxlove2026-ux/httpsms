@@ -1,0 +1,1688 @@
+import { h, inject, computed, unref, shallowRef, ref, watch, isRef, defineComponent, useSlots, useModel, toRef, openBlock, createElementBlock, mergeProps, createBlock, resolveDynamicComponent, normalizeProps, guardReactiveProps, createSlots, withCtx, renderSlot, createVNode, toDisplayString, createCommentVNode, createElementVNode, renderList, mergeModels, markRaw, provide } from "vue";
+import { VTextField, VListItem, VAutocomplete, VSelect } from "vuetify/components";
+import { getSupportedRegionCodes, getCountryCodeForRegionCode, getExample, parsePhoneNumber } from "awesome-phonenumber";
+function getPhoneCountryIconAttrs(props) {
+  return props.decorative ? {} : {
+    role: "img",
+    title: props.country.name,
+    "aria-label": props.country.name
+  };
+}
+function makePhoneInputCountryDisplayProps() {
+  return {
+    /**
+     * Country to display.
+     */
+    country: {
+      required: true,
+      type: Object
+    },
+    /**
+     * Tells if the icon should be ignored by screen readers or if it must have
+     * an accessible name (e.g. through `title` attribute).
+     */
+    decorative: {
+      type: Boolean
+    }
+  };
+}
+const VPhoneCountryFlagSprite = /* @__PURE__ */ Object.assign(
+  (props) => h(
+    "span",
+    {
+      ...getPhoneCountryIconAttrs(props),
+      class: ["v-phone-input__country__icon", "f32"]
+    },
+    h("span", { class: ["flag", props.country.iso2.toLowerCase()] })
+  ),
+  { props: makePhoneInputCountryDisplayProps() }
+);
+const VPhoneCountryFlagSvg = /* @__PURE__ */ Object.assign(
+  (props) => h("span", {
+    ...getPhoneCountryIconAttrs(props),
+    class: [
+      "v-phone-input__country__icon",
+      "fi",
+      `fi-${props.country.iso2.toLowerCase()}`
+    ]
+  }),
+  { props: makePhoneInputCountryDisplayProps() }
+);
+function formatPhoneObject(format, phone) {
+  return phone.number?.[format ?? "input"] ?? phone.number?.input ?? "";
+}
+const AC = "ASC";
+const AD = "AND";
+const AE = "ARE";
+const AF = "AFG";
+const AG = "ATG";
+const AI = "AIA";
+const AL = "ALB";
+const AM = "ARM";
+const AO = "AGO";
+const AQ = "ATA";
+const AR = "ARG";
+const AS = "ASM";
+const AT = "AUT";
+const AU = "AUS";
+const AW = "ABW";
+const AX = "ALA";
+const AZ = "AZE";
+const BA = "BIH";
+const BB = "BRB";
+const BD = "BGD";
+const BE = "BEL";
+const BF = "BFA";
+const BG = "BGR";
+const BH = "BHR";
+const BI = "BDI";
+const BJ = "BEN";
+const BL = "BLM";
+const BM = "BMU";
+const BN = "BRN";
+const BO = "BOL";
+const BQ = "BES";
+const BR = "BRA";
+const BS = "BHS";
+const BT = "BTN";
+const BV = "BVT";
+const BW = "BWA";
+const BY = "BLR";
+const BZ = "BLZ";
+const CA = "CAN";
+const CC = "CCK";
+const CD = "COD";
+const CF = "CAF";
+const CG = "COG";
+const CH = "CHE";
+const CI = "CIV";
+const CK = "COK";
+const CL = "CHL";
+const CM = "CMR";
+const CN = "CHN";
+const CO = "COL";
+const CR = "CRI";
+const CU = "CUB";
+const CV = "CPV";
+const CW = "CUW";
+const CX = "CXR";
+const CY = "CYP";
+const CZ = "CZE";
+const DE = "DEU";
+const DJ = "DJI";
+const DK = "DNK";
+const DM = "DMA";
+const DO = "DOM";
+const DZ = "DZA";
+const EC = "ECU";
+const EE = "EST";
+const EG = "EGY";
+const EH = "ESH";
+const ER = "ERI";
+const ES = "ESP";
+const ET = "ETH";
+const FI = "FIN";
+const FJ = "FJI";
+const FK = "FLK";
+const FM = "FSM";
+const FO = "FRO";
+const FR = "FRA";
+const GA = "GAB";
+const GB = "GBR";
+const GD = "GRD";
+const GE = "GEO";
+const GF = "GUF";
+const GG = "GGY";
+const GH = "GHA";
+const GI = "GIB";
+const GL = "GRL";
+const GM = "GMB";
+const GN = "GIN";
+const GP = "GLP";
+const GQ = "GNQ";
+const GR = "GRC";
+const GS = "SGS";
+const GT = "GTM";
+const GU = "GUM";
+const GW = "GNB";
+const GY = "GUY";
+const HK = "HKG";
+const HM = "HMD";
+const HN = "HND";
+const HR = "HRV";
+const HT = "HTI";
+const HU = "HUN";
+const ID = "IDN";
+const IE = "IRL";
+const IL = "ISR";
+const IM = "IMN";
+const IN = "IND";
+const IO = "IOT";
+const IQ = "IRQ";
+const IR = "IRN";
+const IS = "ISL";
+const IT = "ITA";
+const JE = "JEY";
+const JM = "JAM";
+const JO = "JOR";
+const JP = "JPN";
+const KE = "KEN";
+const KG = "KGZ";
+const KH = "KHM";
+const KI = "KIR";
+const KM = "COM";
+const KN = "KNA";
+const KP = "PRK";
+const KR = "KOR";
+const KW = "KWT";
+const KY = "CYM";
+const KZ = "KAZ";
+const LA = "LAO";
+const LB = "LBN";
+const LC = "LCA";
+const LI = "LIE";
+const LK = "LKA";
+const LR = "LBR";
+const LS = "LSO";
+const LT = "LTU";
+const LU = "LUX";
+const LV = "LVA";
+const LY = "LBY";
+const MA = "MAR";
+const MC = "MCO";
+const MD = "MDA";
+const ME = "MNE";
+const MF = "MAF";
+const MG = "MDG";
+const MH = "MHL";
+const MK = "MKD";
+const ML = "MLI";
+const MM = "MMR";
+const MN = "MNG";
+const MO = "MAC";
+const MP = "MNP";
+const MQ = "MTQ";
+const MR = "MRT";
+const MS = "MSR";
+const MT = "MLT";
+const MU = "MUS";
+const MV = "MDV";
+const MW = "MWI";
+const MX = "MEX";
+const MY = "MYS";
+const MZ = "MOZ";
+const NA = "NAM";
+const NC = "NCL";
+const NE = "NER";
+const NF = "NFK";
+const NG = "NGA";
+const NI = "NIC";
+const NL = "NLD";
+const NO = "NOR";
+const NP = "NPL";
+const NR = "NRU";
+const NU = "NIU";
+const NZ = "NZL";
+const OM = "OMN";
+const PA = "PAN";
+const PE = "PER";
+const PF = "PYF";
+const PG = "PNG";
+const PH = "PHL";
+const PK = "PAK";
+const PL = "POL";
+const PM = "SPM";
+const PN = "PCN";
+const PR = "PRI";
+const PS = "PSE";
+const PT = "PRT";
+const PW = "PLW";
+const PY = "PRY";
+const QA = "QAT";
+const RE = "REU";
+const RO = "ROU";
+const RS = "SRB";
+const RU = "RUS";
+const RW = "RWA";
+const SA = "SAU";
+const SB = "SLB";
+const SC = "SYC";
+const SD = "SDN";
+const SE = "SWE";
+const SG = "SGP";
+const SH = "SHN";
+const SI = "SVN";
+const SJ = "SJM";
+const SK = "SVK";
+const SL = "SLE";
+const SM = "SMR";
+const SN = "SEN";
+const SO = "SOM";
+const SR = "SUR";
+const SS = "SSD";
+const ST = "STP";
+const SV = "SLV";
+const SX = "SXM";
+const SY = "SYR";
+const SZ = "SWZ";
+const TA = "TAA";
+const TC = "TCA";
+const TD = "TCD";
+const TF = "ATF";
+const TG = "TGO";
+const TH = "THA";
+const TJ = "TJK";
+const TK = "TKL";
+const TL = "TLS";
+const TM = "TKM";
+const TN = "TUN";
+const TO = "TON";
+const TR = "TUR";
+const TT = "TTO";
+const TV = "TUV";
+const TW = "TWN";
+const TZ = "TZA";
+const UA = "UKR";
+const UG = "UGA";
+const UM = "UMI";
+const US = "USA";
+const UY = "URY";
+const UZ = "UZB";
+const VA = "VAT";
+const VC = "VCT";
+const VE = "VEN";
+const VG = "VGB";
+const VI = "VIR";
+const VN = "VNM";
+const VU = "VUT";
+const WF = "WLF";
+const WS = "WSM";
+const XK = "XKX";
+const YE = "YEM";
+const YT = "MYT";
+const ZA = "ZAF";
+const ZM = "ZMB";
+const ZW = "ZWE";
+const countriesJson = {
+  AC,
+  AD,
+  AE,
+  AF,
+  AG,
+  AI,
+  AL,
+  AM,
+  AO,
+  AQ,
+  AR,
+  AS,
+  AT,
+  AU,
+  AW,
+  AX,
+  AZ,
+  BA,
+  BB,
+  BD,
+  BE,
+  BF,
+  BG,
+  BH,
+  BI,
+  BJ,
+  BL,
+  BM,
+  BN,
+  BO,
+  BQ,
+  BR,
+  BS,
+  BT,
+  BV,
+  BW,
+  BY,
+  BZ,
+  CA,
+  CC,
+  CD,
+  CF,
+  CG,
+  CH,
+  CI,
+  CK,
+  CL,
+  CM,
+  CN,
+  CO,
+  CR,
+  CU,
+  CV,
+  CW,
+  CX,
+  CY,
+  CZ,
+  DE,
+  DJ,
+  DK,
+  DM,
+  DO,
+  DZ,
+  EC,
+  EE,
+  EG,
+  EH,
+  ER,
+  ES,
+  ET,
+  FI,
+  FJ,
+  FK,
+  FM,
+  FO,
+  FR,
+  GA,
+  GB,
+  GD,
+  GE,
+  GF,
+  GG,
+  GH,
+  GI,
+  GL,
+  GM,
+  GN,
+  GP,
+  GQ,
+  GR,
+  GS,
+  GT,
+  GU,
+  GW,
+  GY,
+  HK,
+  HM,
+  HN,
+  HR,
+  HT,
+  HU,
+  ID,
+  IE,
+  IL,
+  IM,
+  IN,
+  IO,
+  IQ,
+  IR,
+  IS,
+  IT,
+  JE,
+  JM,
+  JO,
+  JP,
+  KE,
+  KG,
+  KH,
+  KI,
+  KM,
+  KN,
+  KP,
+  KR,
+  KW,
+  KY,
+  KZ,
+  LA,
+  LB,
+  LC,
+  LI,
+  LK,
+  LR,
+  LS,
+  LT,
+  LU,
+  LV,
+  LY,
+  MA,
+  MC,
+  MD,
+  ME,
+  MF,
+  MG,
+  MH,
+  MK,
+  ML,
+  MM,
+  MN,
+  MO,
+  MP,
+  MQ,
+  MR,
+  MS,
+  MT,
+  MU,
+  MV,
+  MW,
+  MX,
+  MY,
+  MZ,
+  NA,
+  NC,
+  NE,
+  NF,
+  NG,
+  NI,
+  NL,
+  NO,
+  NP,
+  NR,
+  NU,
+  NZ,
+  OM,
+  PA,
+  PE,
+  PF,
+  PG,
+  PH,
+  PK,
+  PL,
+  PM,
+  PN,
+  PR,
+  PS,
+  PT,
+  PW,
+  PY,
+  QA,
+  RE,
+  RO,
+  RS,
+  RU,
+  RW,
+  SA,
+  SB,
+  SC,
+  SD,
+  SE,
+  SG,
+  SH,
+  SI,
+  SJ,
+  SK,
+  SL,
+  SM,
+  SN,
+  SO,
+  SR,
+  SS,
+  ST,
+  SV,
+  SX,
+  SY,
+  SZ,
+  TA,
+  TC,
+  TD,
+  TF,
+  TG,
+  TH,
+  TJ,
+  TK,
+  TL,
+  TM,
+  TN,
+  TO,
+  TR,
+  TT,
+  TV,
+  TW,
+  TZ,
+  UA,
+  UG,
+  UM,
+  US,
+  UY,
+  UZ,
+  VA,
+  VC,
+  VE,
+  VG,
+  VI,
+  VN,
+  VU,
+  WF,
+  WS,
+  XK,
+  YE,
+  YT,
+  ZA,
+  ZM,
+  ZW
+};
+const V_PHONE_INPUT_INJECTION_KEY = /* @__PURE__ */ Symbol(
+  "VPhoneInput options injection key"
+);
+function injectPhoneInputPluginOptions() {
+  return inject(
+    V_PHONE_INPUT_INJECTION_KEY,
+    {}
+  );
+}
+const undefinedBoolean = /* @__PURE__ */ Symbol("VPhoneInput undefined boolean");
+function usePhoneInputPluginOptions() {
+  const injected = injectPhoneInputPluginOptions();
+  const getOption = (key, options, defaultValue) => {
+    const aValue = unref(options[key]);
+    if (aValue === void 0 || aValue === undefinedBoolean) {
+      const bValue = unref(injected[key]);
+      if (bValue === void 0 || bValue === undefinedBoolean) {
+        return defaultValue;
+      }
+      return bValue;
+    }
+    return aValue;
+  };
+  return {
+    getOption,
+    useOption: (key, options, defaultValue) => computed(() => getOption(key, options, unref(defaultValue)))
+  };
+}
+function normalizeCountryIso2(country) {
+  return (country ?? "").toUpperCase();
+}
+function normalizeCountry(country) {
+  return normalizeCountryIso2(
+    typeof country === "string" ? country : country?.iso2
+  );
+}
+function normalizeCountriesSet(countries) {
+  return new Set((unref(countries) ?? []).map(normalizeCountry));
+}
+function getDefaultCountries(countryName) {
+  return Object.keys(countriesJson).map((iso2) => ({
+    name: countryName(iso2),
+    dialCode: `${getCountryCodeForRegionCode(iso2)}`,
+    iso2
+  })).sort((a, b) => a.name.localeCompare(b.name));
+}
+function usePhoneInputCountries(options) {
+  const supportedCountries = getSupportedRegionCodes();
+  const { getOption, useOption } = usePhoneInputPluginOptions();
+  const countryLocaleOption = useOption("countryLocale", options, "en");
+  const countryNameOption = useOption(
+    "countryName",
+    options,
+    (iso2) => countryDisplayNames.value.of(iso2) ?? iso2
+  );
+  const countriesOption = computed(
+    () => getOption(
+      "countries",
+      options,
+      getDefaultCountries(countryNameOption.value)
+    )
+  );
+  const preferCountriesOption = computed(
+    () => normalizeCountriesSet(getOption("preferCountries", options) ?? [])
+  );
+  const includeCountriesOption = computed(
+    () => normalizeCountriesSet(getOption("includeCountries", options) ?? [])
+  );
+  const excludeCountriesOption = computed(
+    () => normalizeCountriesSet(getOption("excludeCountries", options) ?? [])
+  );
+  const defaultCountryOption = useOption("defaultCountry", options);
+  const countryDisplayNames = computed(
+    () => new Intl.DisplayNames([countryLocaleOption.value ?? "en"], {
+      type: "region"
+    })
+  );
+  const countriesByIso2 = computed(() => {
+    const countries2 = countriesOption.value.reduce((map, country) => {
+      const iso2 = normalizeCountry(country);
+      if (supportedCountries.indexOf(iso2) !== -1 && (!includeCountriesOption.value.size || includeCountriesOption.value.has(iso2)) && (!excludeCountriesOption.value.size || !excludeCountriesOption.value.has(iso2))) {
+        map.set(iso2, country);
+      }
+      return map;
+    }, /* @__PURE__ */ new Map());
+    if (!countries2.size) {
+      throw new Error(
+        "[VPhoneInput] Countries list must contain at least one country."
+      );
+    }
+    return countries2;
+  });
+  const findCountry = computed(
+    () => (value) => value ? countriesByIso2.value.get(normalizeCountry(value)) ?? null : null
+  );
+  const countriesPreference = computed(() => {
+    const preferred = [];
+    const unpreferred = new Map(countriesByIso2.value);
+    preferCountriesOption.value.forEach((iso2) => {
+      const unpreferredCountry = unpreferred.get(iso2);
+      if (unpreferredCountry) {
+        preferred.push(unpreferredCountry);
+        unpreferred.delete(iso2);
+      }
+    });
+    return {
+      preferred,
+      unpreferred: [...unpreferred.values()]
+    };
+  });
+  const preferredCountries = computed(
+    () => countriesPreference.value.preferred
+  );
+  const unpreferredCountries = computed(
+    () => countriesPreference.value.unpreferred
+  );
+  const countries = computed(() => [
+    ...preferredCountries.value,
+    ...unpreferredCountries.value
+  ]);
+  const defaultCountry = computed(
+    () => findCountry.value(defaultCountryOption.value)
+  );
+  const fallbackCountry = computed(
+    // biome-ignore lint/style/noNonNullAssertion: Countries is non-empty as this step.
+    () => defaultCountry.value ?? countries.value[0]
+  );
+  return {
+    countries,
+    preferredCountries,
+    unpreferredCountries,
+    defaultCountry,
+    fallbackCountry,
+    findCountry
+  };
+}
+function resolveMessage(message, context) {
+  return typeof message === "function" ? message(context) : (
+    // biome-ignore lint/suspicious/noExplicitAny: TypeScript low support for conditional types.
+    message ?? void 0
+  );
+}
+function usePhoneInputMessages(options) {
+  const { useOption } = usePhoneInputPluginOptions();
+  const exampleFormatOption = useOption(
+    "exampleFormat",
+    options,
+    "national"
+  );
+  const exampleOption = useOption(
+    "example",
+    options,
+    () => formatPhoneObject(
+      exampleFormatOption.value,
+      getExample(country.value.iso2)
+    )
+  );
+  const labelOption = useOption("label", options, "Phone");
+  const ariaLabelOption = useOption("ariaLabel", options);
+  const countryLabelOption = useOption(
+    "countryLabel",
+    options,
+    (ctx) => `Country for "${ctx.label}"`
+  );
+  const countryAriaLabelOption = useOption("countryAriaLabel", options);
+  const placeholderOption = useOption("placeholder", options);
+  const invalidMessageOption = useOption(
+    "invalidMessage",
+    options,
+    (ctx) => `The "${ctx.label}" field is not a valid phone number (example: ${ctx.example}).`
+  );
+  const country = computed(() => unref(options.country));
+  const example = computed(
+    () => resolveMessage(exampleOption.value, {
+      country: country.value,
+      example: void 0,
+      label: void 0
+    })
+  );
+  const label = computed(
+    () => resolveMessage(labelOption.value, {
+      country: country.value,
+      example: example.value,
+      label: void 0
+    })
+  );
+  const ariaLabel = computed(
+    () => resolveMessage(ariaLabelOption.value, {
+      country: country.value,
+      example: example.value,
+      label: void 0
+    })
+  );
+  const resolveMessageRef = computed(
+    () => (message) => resolveMessage(message, {
+      country: country.value,
+      example: example.value,
+      label: label.value
+    })
+  );
+  return {
+    example,
+    label,
+    ariaLabel,
+    countryLabel: computed(
+      () => resolveMessageRef.value(countryLabelOption.value)
+    ),
+    countryAriaLabel: computed(
+      () => resolveMessageRef.value(countryAriaLabelOption.value)
+    ),
+    placeholder: computed(
+      () => resolveMessageRef.value(placeholderOption.value)
+    ),
+    invalidMessage: computed(
+      () => resolveMessageRef.value(invalidMessageOption.value)
+    ),
+    resolveMessage: resolveMessageRef
+  };
+}
+function usePhoneInput(options) {
+  const countries = usePhoneInputCountries(options);
+  const { useOption } = usePhoneInputPluginOptions();
+  const guessCountryOption = useOption("guessCountry", options);
+  const modelFormatOption = useOption("modelFormat", options, "e164");
+  const displayFormatOption = useOption(
+    "displayFormat",
+    options,
+    "national"
+  );
+  const exampleFormatOption = useOption(
+    "exampleFormat",
+    options,
+    displayFormatOption
+  );
+  const displayFormatDelayOption = useOption("displayFormatDelay", options);
+  const displayFormatOnBlurOption = useOption(
+    "displayFormatOnBlur",
+    options,
+    true
+  );
+  const validateOption = useOption(
+    "validate",
+    options,
+    (phone2, country2) => !phone2 || phone2.valid && phone2.regionCode === country2.iso2
+  );
+  const countryInputRef = options.countryInputRef ?? shallowRef();
+  const phoneInputRef = options.phoneInputRef ?? shallowRef();
+  const phone = ref(null);
+  const country = options.country ?? ref();
+  const countryGuessing = ref(false);
+  const countryObject = computed({
+    get: () => countries.findCountry.value(country.value) ?? countries.fallbackCountry.value,
+    set: (value) => {
+      country.value = value.iso2;
+    }
+  });
+  const phoneObject = computed(() => {
+    const input = (phone.value ?? "").trim();
+    return input !== "" ? parsePhoneNumber((phone.value ?? "").trim(), {
+      regionCode: countryObject.value.iso2
+    }) : null;
+  });
+  const phoneValid = computed(() => {
+    if (validateOption.value === null) {
+      return null;
+    }
+    return validateOption.value(phoneObject.value, countryObject.value);
+  });
+  const phoneFormatted = computed(() => {
+    if (phoneObject.value === null) {
+      return phone.value ?? "";
+    }
+    return modelFormatOption.value !== null ? formatPhoneObject(modelFormatOption.value, phoneObject.value) || (phone.value ?? "") : phoneObject.value.number?.input ?? "";
+  });
+  const displayFormatOnBlurCanBound = computed(
+    () => !!countryInputRef.value || !!phoneInputRef.value
+  );
+  let delayedFormatPhoneInputValueTimeout;
+  const formatPhoneInputValue = () => {
+    clearTimeout(delayedFormatPhoneInputValueTimeout);
+    if (phoneObject.value && phoneValid.value && displayFormatOption.value !== null) {
+      phone.value = formatPhoneObject(
+        displayFormatOption.value,
+        phoneObject.value
+      );
+    }
+  };
+  const updateCountryFromPhone = () => {
+    if (phoneObject.value?.regionCode) {
+      const phoneCountry = countries.findCountry.value(
+        phoneObject.value.regionCode
+      );
+      if (phoneCountry) {
+        countryObject.value = phoneCountry;
+        return phoneCountry;
+      }
+    }
+    return null;
+  };
+  const onModelValueChange = (next) => {
+    if (next !== (phoneObject.value?.number?.input ?? "") && next !== phoneFormatted.value) {
+      phone.value = next ?? "";
+      formatPhoneInputValue();
+    }
+  };
+  const onCountryChange = (next, prev) => {
+    if (!next || !countries.findCountry.value(next)) {
+      country.value = prev ?? countries.fallbackCountry.value.iso2;
+      return;
+    }
+    if (phoneObject.value?.regionCode && phoneObject.value.regionCode !== next) {
+      const phoneSignificant = phoneObject.value.number?.significant;
+      if (phoneSignificant) {
+        const nextPhoneObject = parsePhoneNumber(
+          `+${getCountryCodeForRegionCode(next)}${phoneSignificant}`
+        );
+        phone.value = formatPhoneObject(
+          displayFormatOption.value,
+          nextPhoneObject
+        );
+      }
+    }
+    if (guessCountryOption.value && "memoized" in guessCountryOption.value) {
+      if (isRef(guessCountryOption.value.memoized)) {
+        guessCountryOption.value.memoized.value = next;
+      } else {
+        guessCountryOption.value.memoized = next;
+      }
+    }
+  };
+  const onPhoneChange = (next) => {
+    if (typeof next !== "string") {
+      phone.value = "";
+      return;
+    }
+    updateCountryFromPhone();
+  };
+  const onPhoneObjectChange = () => {
+    const displayFormatDelay = !displayFormatOnBlurOption.value || !displayFormatOnBlurCanBound.value ? displayFormatDelayOption.value ?? true : displayFormatDelayOption.value;
+    if (displayFormatDelay === true || typeof displayFormatDelay === "number") {
+      const displayFormatDelayOrDefault = displayFormatDelay === true ? 1e3 : displayFormatDelay;
+      if (displayFormatDelayOrDefault > 0) {
+        delayedFormatPhoneInputValueTimeout = setTimeout(
+          formatPhoneInputValue,
+          displayFormatDelayOrDefault
+        );
+      } else {
+        formatPhoneInputValue();
+      }
+    }
+  };
+  const onPhoneFormattedChange = () => {
+    options.modelValue.value = phoneFormatted.value;
+  };
+  const onInputBlur = () => {
+    if (displayFormatOnBlurOption.value) {
+      formatPhoneInputValue();
+    }
+  };
+  const onInputRefChange = (next, prev) => {
+    const unrefElement = (value) => value?.$el ?? value;
+    unrefElement(prev)?.removeEventListener("blur", onInputBlur);
+    unrefElement(next)?.addEventListener("blur", onInputBlur);
+  };
+  const manualCountry = countries.findCountry.value(country.value);
+  country.value = (manualCountry ?? countries.fallbackCountry.value).iso2;
+  phone.value = options.modelValue.value ?? "";
+  const detectedCountry = updateCountryFromPhone();
+  if (phoneValid.value) {
+    formatPhoneInputValue();
+  }
+  if (!manualCountry && !detectedCountry) {
+    const guessCountry = () => {
+      if (countries.countries.value.length === 1) {
+        return countries.countries.value[0];
+      }
+      const guessCountryValue = guessCountryOption.value;
+      if (guessCountryValue) {
+        const memoizedGuessedCountry = unref(guessCountryValue.memoized);
+        if (memoizedGuessedCountry) {
+          return memoizedGuessedCountry;
+        }
+        return guessCountryValue();
+      }
+      return null;
+    };
+    countryGuessing.value = true;
+    const useGuessedCountry = (guessedCountry2) => {
+      countryObject.value = countries.findCountry.value(guessedCountry2) ?? countries.fallbackCountry.value;
+      countryGuessing.value = false;
+    };
+    const guessedCountry = guessCountry();
+    if (guessedCountry && typeof guessedCountry !== "string") {
+      (async () => {
+        useGuessedCountry(await guessedCountry);
+      })();
+    } else {
+      useGuessedCountry(guessedCountry);
+    }
+  }
+  watch(displayFormatOption, formatPhoneInputValue);
+  watch(options.modelValue, onModelValueChange);
+  watch(phone, onPhoneChange);
+  watch(country, onCountryChange);
+  watch(phoneObject, onPhoneObjectChange);
+  watch(phoneFormatted, onPhoneFormattedChange);
+  watch(countryInputRef, onInputRefChange, { immediate: true });
+  watch(phoneInputRef, onInputRefChange, { immediate: true });
+  return {
+    ...countries,
+    ...usePhoneInputMessages({
+      ...options,
+      country: countryObject,
+      exampleFormat: exampleFormatOption
+    }),
+    countryInputRef,
+    phoneInputRef,
+    phone,
+    countryObject,
+    phoneObject,
+    phoneValid,
+    countryGuessing,
+    formatPhoneInputValue
+  };
+}
+function omitBy(object, predicate) {
+  return Object.fromEntries(
+    Object.keys(object).filter(
+      (key) => key in object && predicate(key)
+    ).map((key) => [key, object[key]])
+  );
+}
+function pick(object, keys) {
+  return Object.fromEntries(
+    keys.filter((key) => key in object).map((key) => [key, object[key]])
+  );
+}
+const vPhoneInputSharedProperties = [
+  // TODO Check other properties which should be included (bgColor, etc.)
+  "variant",
+  "flat",
+  "tile",
+  "density",
+  "singleLine",
+  "hideDetails",
+  "reverse",
+  "color",
+  "bgColor",
+  "theme",
+  "disabled",
+  "readonly",
+  "rounded"
+];
+function makePhoneInputCountryProps() {
+  return {
+    /**
+     * Locale to use when localizing country names.
+     *
+     * @defaultValue
+     * `'en'`
+     */
+    countryLocale: {
+      type: String
+    },
+    /**
+     * Resolve a country name from its ISO-2 code.
+     *
+     * @defaultValue
+     * Uses `Intl.DisplayNames` to localize the country name in defined `countryLocale`.
+     */
+    countryName: {
+      type: Function
+    },
+    /**
+     * List of available countries.
+     *
+     * @defaultValue
+     * Uses `countries-list` two-letter codes, dial codes resolved using
+     * `awesome-phonenumber` package's `getCountryCodeForRegionCode`, and
+     * given locale (or `en`) translated names using `Intl.DisplayNames`.
+     */
+    countries: {
+      type: Array
+    },
+    /**
+     * List of countries to prefer.
+     *
+     * @remarks
+     * When specified, any country which is in the list will appear first
+     * in available countries.
+     */
+    preferCountries: {
+      type: Array
+    },
+    /**
+     * List of countries to include.
+     *
+     * @remarks
+     * When specified, any country which is not in this list will be excluded
+     * from available countries.
+     */
+    includeCountries: {
+      type: Array
+    },
+    /**
+     * List of countries to exclude.
+     *
+     * @remarks
+     * When specified, any country which is in this list will be excluded
+     * from available countries.
+     */
+    excludeCountries: {
+      type: Array
+    },
+    /**
+     * Default country to use.
+     *
+     * @defaultValue
+     * First country from the available `countries` list.
+     */
+    defaultCountry: {
+      type: [String, Object]
+    }
+  };
+}
+function makePhoneInputMessagesProps() {
+  return {
+    /**
+     * Format example phone.
+     *
+     * @remarks
+     * Using `null` will disable formating example phone numbers.
+     *
+     * @defaultValue
+     * `displayFormat` value if available, `'national'` otherwise.
+     */
+    exampleFormat: {
+      type: [String, null]
+    },
+    /**
+     * Customize the phone input example.
+     *
+     * @defaultValue
+     * Use `awesome-phonenumber` package's `getExample` function with current country.
+     */
+    example: {
+      type: [String, Function]
+    },
+    /**
+     * Customize the phone input label.
+     *
+     * @defaultValue
+     * `'Phone'`
+     */
+    label: {
+      type: [String, Function]
+    },
+    /**
+     * Customize the phone input `aria-label`.
+     */
+    ariaLabel: {
+      type: [String, Function, null]
+    },
+    /**
+     * Customize the country input label.
+     *
+     * @defaultValue
+     * `'Country for <label>'` when using the composable, `null` otherwise.
+     */
+    countryLabel: {
+      type: [
+        String,
+        Function,
+        null
+      ]
+    },
+    /**
+     * Customize the country input `aria-label`.
+     *
+     * @defaultValue
+     * `'Country for <label>'` when using the component, `null` otherwise.
+     */
+    countryAriaLabel: {
+      type: [
+        String,
+        Function,
+        null
+      ]
+    },
+    /**
+     * Customize the phone input placeholder.
+     */
+    placeholder: {
+      type: [
+        String,
+        Function,
+        null
+      ]
+    },
+    /**
+     * Customize the phone input invalid message returned by the
+     * `validate` function generated rule.
+     *
+     * @defaultValue
+     * `'The "<label>" field is not a valid phone number (example: <example>).'`
+     */
+    invalidMessage: {
+      type: [
+        String,
+        Function,
+        null
+      ]
+    }
+  };
+}
+function makePhoneInputComposableSpecificProps() {
+  return {
+    /**
+     * Guess the country of the user.
+     */
+    guessCountry: {
+      type: Function
+    },
+    /**
+     * Format phone number for `modelValue` updates.
+     *
+     * @remarks
+     * This only applies to valid phone numbers.
+     * Using `null` will disable format feature and keep the input as is.
+     *
+     * @defaultValue
+     * `'e164'`
+     */
+    modelFormat: {
+      type: [String, null]
+    },
+    /**
+     * Format phone number for text input value.
+     *
+     * @remarks
+     * This only applies to valid phone numbers.
+     * Using `null` will disable format feature and keep the input as is.
+     *
+     * @defaultValue
+     * `'national'`
+     */
+    displayFormat: {
+      type: [String, null]
+    },
+    /**
+     * Delay (in milliseconds) before formatting the phone number
+     * for text input value when detecting an input.
+     *
+     * @remarks
+     * This only applies to valid phone numbers.
+     * Using `0` will format immediately after input.
+     *
+     * @defaultValue
+     * `1000` if `displayFormatOnBlur` is disabled.
+     */
+    displayFormatDelay: {
+      type: [Number, Boolean, Symbol],
+      default: undefinedBoolean
+    },
+    /**
+     * Format the phone number for text input only on blur event.
+     *
+     * @remarks
+     * This bypass the `displayFormatDelay` option, and only format the phone
+     * number on blur event or on `displayFormat` property change.
+     * Using `false` will restore the `displayFormatDelay` behavior.
+     * When using the composable, it is required to bind `countryInputRef` and
+     * `phoneInputRef` to appropriate focusable inputs.
+     *
+     * @defaultValue
+     * `true`
+     */
+    displayFormatOnBlur: {
+      type: [Boolean, Symbol],
+      default: undefinedBoolean
+    },
+    /**
+     * Validate a phone number.
+     *
+     * @remarks
+     * Using `null` will disable the validation.
+     *
+     * @defaultValue
+     * Ensure `ParsedPhoneNumber.valid` is true and `ParsedPhoneNumber.regionCode` is a selectable
+     * country (not excluded from the countries list).
+     */
+    validate: {
+      type: [Function, null]
+    }
+  };
+}
+function makePhoneInputComposableProps() {
+  return {
+    ...makePhoneInputCountryProps(),
+    ...makePhoneInputMessagesProps(),
+    ...makePhoneInputComposableSpecificProps()
+  };
+}
+function makePhoneInputComponentSpecificProps() {
+  return {
+    /**
+     * Country input component.
+     *
+     * @internal Use `usePhoneInput` instead if you want to use a custom component.
+     */
+    countryInputComponent: {
+      type: [Function, Object]
+    },
+    /**
+     * Country input component specific props.
+     *
+     * @internal Use `countryProps` property instead.
+     */
+    countryInputComponentProps: {
+      type: Object
+    },
+    /**
+     * Country display component.
+     */
+    countryDisplayComponent: {
+      type: [Function, Object]
+    },
+    /**
+     * Toggle country input loading state whenever a country is currently guessing.
+     */
+    guessLoading: {
+      type: [Boolean, Symbol],
+      default: undefinedBoolean
+    },
+    /**
+     * Properties to pass to the wrapper div.
+     */
+    wrapperAttrs: {
+      type: Object
+    },
+    /**
+     * Properties to pass to the country input (`VSelect` or `VAutocomplete`).
+     */
+    countryProps: {
+      type: Object
+    },
+    /**
+     * Properties to pass to the country input (`VTextField`).
+     */
+    phoneProps: {
+      type: Object
+    },
+    /**
+     * Customize the phone input hint.
+     */
+    hint: {
+      type: [String, Function]
+    }
+  };
+}
+function makePhoneInputProps() {
+  return {
+    ...makePhoneInputComposableProps(),
+    ...makePhoneInputComponentSpecificProps()
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function makePhoneInputCompleteProps() {
+  return {
+    ...VTextField.props,
+    ...makePhoneInputProps()
+  };
+}
+const _hoisted_1 = { key: 1 };
+const _hoisted_2 = { class: "v-phone-input__country__title" };
+const _hoisted_3 = {
+  key: 0,
+  class: "v-phone-input__country__append"
+};
+const _sfc_main = /* @__PURE__ */ defineComponent({
+  ...{
+    inheritAttrs: false,
+    components: {
+      VTextField,
+      VListItem
+    }
+  },
+  __name: "VPhoneInput",
+  props: /* @__PURE__ */ mergeModels(/* @__PURE__ */ makePhoneInputCompleteProps(), {
+    "modelValue": { default: "" },
+    "modelModifiers": {},
+    "country": { default: "" },
+    "countryModifiers": {}
+  }),
+  emits: /* @__PURE__ */ mergeModels(["update:country-object", "update:phone-object"], ["update:modelValue", "update:country"]),
+  setup(__props, { expose: __expose, emit: __emit }) {
+    const slots = useSlots();
+    const emit = __emit;
+    const props = __props;
+    const modelValue = useModel(__props, "modelValue");
+    const country = useModel(__props, "country");
+    const { useOption } = usePhoneInputPluginOptions();
+    const countryInputComponentOption = useOption("countryInputComponent", props);
+    const countryInputComponentPropsOption = useOption(
+      "countryInputComponentProps",
+      props
+    );
+    const countryDisplayComponentOption = useOption(
+      "countryDisplayComponent",
+      props
+    );
+    const guessLoadingOption = useOption("guessLoading", props, true);
+    const wrapperAttrsOption = useOption("wrapperAttrs", props);
+    const countryPropsOption = useOption("countryProps", props);
+    const phonePropsOption = useOption("phoneProps", props);
+    const countryLabelOption = useOption("countryLabel", props, null);
+    const countryAriaLabelOption = useOption(
+      "countryAriaLabel",
+      props,
+      (ctx) => `Country for "${ctx.label}"`
+    );
+    const hintOption = useOption("hint", props);
+    const countryInputRef = shallowRef();
+    const phoneInputRef = shallowRef();
+    const countryInputFocused = ref(false);
+    const {
+      countries,
+      countryGuessing,
+      resolveMessage: resolveMessage2,
+      countryLabel,
+      countryAriaLabel,
+      label,
+      ariaLabel,
+      placeholder,
+      invalidMessage,
+      countryObject,
+      phone,
+      phoneObject,
+      phoneValid
+    } = usePhoneInput({
+      country,
+      modelValue,
+      countryInputRef: computed(() => countryInputRef.value?.controlRef),
+      phoneInputRef: computed(() => phoneInputRef.value?.controlRef),
+      countryLocale: toRef(props, "countryLocale"),
+      countryName: toRef(props, "countryName"),
+      countries: toRef(props, "countries"),
+      preferCountries: toRef(props, "preferCountries"),
+      includeCountries: toRef(props, "includeCountries"),
+      excludeCountries: toRef(props, "excludeCountries"),
+      defaultCountry: toRef(props, "defaultCountry"),
+      guessCountry: toRef(props, "guessCountry"),
+      modelFormat: toRef(props, "modelFormat"),
+      displayFormat: toRef(props, "displayFormat"),
+      displayFormatDelay: toRef(props, "displayFormatDelay"),
+      displayFormatOnBlur: toRef(props, "displayFormatOnBlur"),
+      validate: toRef(props, "validate"),
+      example: toRef(props, "example"),
+      exampleFormat: toRef(props, "exampleFormat"),
+      countryLabel: countryLabelOption,
+      countryAriaLabel: countryAriaLabelOption,
+      label: toRef(props, "label"),
+      ariaLabel: toRef(props, "ariaLabel"),
+      placeholder: toRef(props, "placeholder"),
+      invalidMessage: toRef(props, "invalidMessage")
+    });
+    const hint = computed(() => resolveMessage2.value(hintOption.value));
+    const phoneInputRules = computed(() => [
+      ...props.rules ?? [],
+      () => {
+        if (phoneValid.value === false) {
+          return invalidMessage.value ?? false;
+        }
+        return true;
+      }
+    ]);
+    const extractMenuProps = (from) => from && "menuProps" in from ? from.menuProps : {};
+    const countryInputProps = computed(() => ({
+      ...pick(props, vPhoneInputSharedProperties),
+      ...countryInputComponentPropsOption.value,
+      ref: countryInputRef,
+      modelValue: country.value,
+      label: countryLabel.value,
+      "aria-label": countryAriaLabel.value,
+      itemTitle: "name",
+      itemValue: "iso2",
+      items: countries.value,
+      prependIcon: props.prependIcon,
+      prependInnerIcon: props.prependInnerIcon,
+      appendInnerIcon: void 0,
+      appendIcon: void 0,
+      loading: guessLoadingOption.value && countryGuessing.value,
+      ...countryPropsOption.value,
+      menuProps: {
+        width: 300,
+        maxHeight: 300,
+        contentClass: "v-phone-input__country__menu",
+        closeOnContentClick: true,
+        ...extractMenuProps(
+          countryInputComponentPropsOption.value
+        ),
+        ...extractMenuProps(countryPropsOption.value)
+      },
+      class: [
+        "v-phone-input__country__input",
+        {
+          "v-phone-input__country__input--focused": countryInputFocused.value
+        }
+      ],
+      onFocus: () => {
+        countryInputFocused.value = true;
+      },
+      onBlur: () => {
+        countryInputFocused.value = false;
+      },
+      "onUpdate:modelValue": (value) => {
+        country.value = value;
+      }
+    }));
+    const nonForwardedPropsKeys = [
+      ...Object.keys(makePhoneInputProps()),
+      "modelValue",
+      "country"
+    ];
+    const forwardedProps = computed(
+      () => omitBy(
+        props,
+        (key) => nonForwardedPropsKeys.indexOf(key) === -1 && props[key] !== VTextField.props[key]?.default
+      )
+    );
+    const phoneInputProps = computed(() => ({
+      ...pick(props, vPhoneInputSharedProperties),
+      ...forwardedProps.value,
+      ref: phoneInputRef,
+      modelValue: phone.value,
+      label: label.value,
+      "aria-label": ariaLabel.value,
+      placeholder: placeholder.value,
+      hint: hint.value,
+      rules: phoneInputRules.value,
+      prependIcon: void 0,
+      prependInnerIcon: void 0,
+      appendInnerIcon: props.appendInnerIcon,
+      appendIcon: props.appendIcon,
+      id: void 0,
+      style: void 0,
+      ...phonePropsOption.value,
+      class: "v-phone-input__phone__input",
+      type: "tel",
+      "onUpdate:modelValue": (value) => {
+        phone.value = value;
+      }
+    }));
+    const parsedSlots = computed(
+      () => Object.keys(slots).reduce(
+        (nextSlots, name) => {
+          const [namespace, ...names] = name.split(":");
+          if (namespace === "country-input" && names.length) {
+            const targetName = names.join(":");
+            if (targetName !== "selection" && targetName !== "item") {
+              nextSlots.country[targetName] = name;
+            }
+          } else {
+            nextSlots.default[name] = null;
+          }
+          return nextSlots;
+        },
+        {
+          country: {},
+          default: {}
+        }
+      )
+    );
+    watch(countryObject, (next) => emit("update:country-object", next));
+    watch(phoneObject, (next) => emit("update:phone-object", next));
+    __expose({
+      countryInputRef,
+      phoneInputRef,
+      countryObject,
+      phoneObject,
+      isValid: computed(() => phoneInputRef.value?.isValid ?? null),
+      errorMessages: computed(
+        () => phoneInputRef.value?.errorMessages ?? []
+      ),
+      reset: async () => phoneInputRef.value?.reset(),
+      resetValidation: async () => phoneInputRef.value?.resetValidation(),
+      validate: async (silent) => await phoneInputRef.value?.validate(silent) ?? []
+    });
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock("div", mergeProps({
+        class: [{ "v-phone-input--prepend-inner-icon": _ctx.prependInnerIcon }, "v-phone-input"]
+      }, unref(wrapperAttrsOption)), [
+        (openBlock(), createBlock(resolveDynamicComponent(unref(countryInputComponentOption)), normalizeProps(guardReactiveProps(countryInputProps.value)), createSlots({
+          selection: withCtx((selectionProps) => [
+            renderSlot(_ctx.$slots, "country-input:selection", normalizeProps(guardReactiveProps(selectionProps)), () => [
+              renderSlot(_ctx.$slots, "country-display", {
+                country: unref(countryObject),
+                decorative: false
+              }, () => [
+                unref(countryDisplayComponentOption) ? (openBlock(), createBlock(resolveDynamicComponent(unref(countryDisplayComponentOption)), {
+                  key: 0,
+                  country: unref(countryObject),
+                  decorative: false
+                }, null, 8, ["country"])) : (openBlock(), createElementBlock("span", _hoisted_1, toDisplayString(`+${unref(countryObject).dialCode}`), 1))
+              ])
+            ])
+          ]),
+          item: withCtx((itemProps) => [
+            renderSlot(_ctx.$slots, "country-input:item", normalizeProps(guardReactiveProps(itemProps)), () => [
+              createVNode(unref(VListItem), normalizeProps(guardReactiveProps(itemProps.props)), {
+                prepend: withCtx(() => [
+                  renderSlot(_ctx.$slots, "country-display", {
+                    country: itemProps.item,
+                    decorative: true
+                  }, () => [
+                    unref(countryDisplayComponentOption) ? (openBlock(), createBlock(resolveDynamicComponent(unref(countryDisplayComponentOption)), {
+                      key: 0,
+                      country: itemProps.item,
+                      decorative: true
+                    }, null, 8, ["country"])) : createCommentVNode("", true)
+                  ])
+                ]),
+                title: withCtx(() => [
+                  renderSlot(_ctx.$slots, "country-name", {
+                    country: itemProps.item
+                  }, () => [
+                    createElementVNode("span", _hoisted_2, toDisplayString(itemProps.item.name), 1)
+                  ])
+                ]),
+                append: withCtx(() => [
+                  renderSlot(_ctx.$slots, "country-append", {
+                    country: itemProps.item
+                  }, () => [
+                    unref(countryDisplayComponentOption) ? (openBlock(), createElementBlock("span", _hoisted_3, " +" + toDisplayString(itemProps.item.dialCode), 1)) : createCommentVNode("", true)
+                  ])
+                ]),
+                _: 2
+              }, 1040)
+            ])
+          ]),
+          _: 2
+        }, [
+          renderList(parsedSlots.value.country, (targetName, name) => {
+            return {
+              name,
+              fn: withCtx((data) => [
+                renderSlot(_ctx.$slots, targetName, normalizeProps(guardReactiveProps(data)))
+              ])
+            };
+          })
+        ]), 1040)),
+        (openBlock(), createBlock(resolveDynamicComponent(unref(VTextField)), normalizeProps(guardReactiveProps(phoneInputProps.value)), createSlots({ _: 2 }, [
+          renderList(parsedSlots.value.default, (_, name) => {
+            return {
+              name,
+              fn: withCtx((data) => [
+                renderSlot(_ctx.$slots, name, normalizeProps(guardReactiveProps(data)))
+              ])
+            };
+          })
+        ]), 1040))
+      ], 16);
+    };
+  }
+});
+const VPhoneInput = _sfc_main;
+function createVPhoneInput(options) {
+  return (app, pluginOptions) => {
+    app.provide(V_PHONE_INPUT_INJECTION_KEY, { ...options, ...pluginOptions });
+    app.component("VPhoneInput", VPhoneInput);
+  };
+}
+const autocompletePhoneCountryInput = {
+  countryInputComponent: /* @__PURE__ */ markRaw(
+    VAutocomplete
+  ),
+  countryInputComponentProps: {
+    filterKeys: ["raw.name", "raw.iso2", "raw.dialCode"],
+    autocomplete: "off",
+    "aria-autocomplete": "off"
+  }
+};
+async function guessPhoneCountry() {
+  let response;
+  let responseText;
+  try {
+    response = await fetch("https://ip2c.org/s");
+    responseText = await response.text();
+  } catch (_) {
+    return void 0;
+  }
+  const countryData = responseText.toString().split(";");
+  if (!countryData || countryData[0] !== "1") {
+    return void 0;
+  }
+  return countryData[1];
+}
+function memoizeGuessPhoneCountry(guess, get, set) {
+  return Object.defineProperty(
+    () => guess(),
+    "memoized",
+    isRef(get) ? {
+      value: get
+    } : {
+      get,
+      set
+    }
+  );
+}
+function providePhoneInputOptions(options) {
+  provide(V_PHONE_INPUT_INJECTION_KEY, options);
+}
+const selectPhoneCountryInput = {
+  countryInputComponent: /* @__PURE__ */ markRaw(VSelect),
+  countryInputComponentProps: {}
+};
+export {
+  VPhoneCountryFlagSprite,
+  VPhoneCountryFlagSvg,
+  VPhoneInput,
+  autocompletePhoneCountryInput,
+  createVPhoneInput,
+  guessPhoneCountry,
+  memoizeGuessPhoneCountry,
+  providePhoneInputOptions,
+  selectPhoneCountryInput,
+  usePhoneInput,
+  vPhoneInputSharedProperties
+};

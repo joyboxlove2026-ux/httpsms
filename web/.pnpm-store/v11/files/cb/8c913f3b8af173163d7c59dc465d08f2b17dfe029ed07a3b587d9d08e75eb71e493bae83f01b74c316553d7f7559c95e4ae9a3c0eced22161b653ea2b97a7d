@@ -1,0 +1,11 @@
+import { FunctionalComponent } from 'vue';
+import { VPhoneCountryDisplayProps, VPhoneInputCountryObject } from '../types';
+/**
+ * Render a country flag using `world-flags-sprite` package.
+ *
+ * @param props
+ *
+ * @function
+ */
+declare const VPhoneCountryFlagSprite: FunctionalComponent<VPhoneCountryDisplayProps<VPhoneInputCountryObject>>;
+export default VPhoneCountryFlagSprite;

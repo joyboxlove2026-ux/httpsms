@@ -1,0 +1,11 @@
+import { FunctionalComponent } from 'vue';
+import { VPhoneCountryDisplayProps, VPhoneInputCountryObject } from '../types';
+/**
+ * Render a country flag using `flag-icons` package.
+ *
+ * @param props
+ *
+ * @function
+ */
+declare const VPhoneCountryFlagSvg: FunctionalComponent<VPhoneCountryDisplayProps<VPhoneInputCountryObject>>;
+export default VPhoneCountryFlagSvg;

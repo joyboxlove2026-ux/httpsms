@@ -1,0 +1,102 @@
+import { Nuxt } from '@nuxt/schema';
+import { Nitro } from 'nitropack';
+import { NitroConfig } from 'nitropack/types';
+import { NuxtPage, NuxtModule } from 'nuxt/schema';
+import { useLogger } from '@nuxt/kit';
+
+type NitroRuntimeCompatibility = {
+    _tag: 'nitro-v2';
+    eventContextModule: 'h3';
+    eventContextType: 'H3EventContext';
+    eventType: `import('h3').H3Event`;
+    nitroTypesModule: 'nitropack';
+} | {
+    _tag: 'nitro-v3';
+    eventContextModule: 'srvx';
+    eventContextType: 'ServerRequestContext';
+    eventType: `import('nitro/h3').H3Event`;
+    nitroTypesModule: 'nitro/types';
+};
+interface NitroTypeAugmentations {
+    eventContext?: string;
+    nitroInterfaces?: Record<string, string>;
+    routeConfig?: string;
+    routeRules?: string;
+    runtimeHooks?: string;
+}
+declare function renderNitroTypeAugmentations(compatibility: NitroRuntimeCompatibility, augmentations: NitroTypeAugmentations): string;
+declare function setupNitroRuntimeCompatibility(nuxt?: Nuxt): NitroRuntimeCompatibility;
+
+interface NuxtSeoModuleDetection {
+    name: string;
+    version?: string;
+    entryPath?: string;
+    features?: Record<string, boolean | string | number>;
+}
+/**
+ * Detect all installed Nuxt SEO modules from `nuxt.options._installedModules`.
+ * No self-registration needed; modules are discovered automatically.
+ */
+declare function detectNuxtSeoModules(nuxt?: Nuxt): NuxtSeoModuleDetection[];
+declare function useModuleLogger(name: string, options: {
+    debug?: boolean;
+}, nuxt?: Nuxt): ReturnType<typeof useLogger>;
+declare function detectTarget(options?: {
+    static?: boolean;
+}): string | undefined;
+declare function resolveNitroPreset(nitroConfig?: NitroConfig): string;
+/**
+ * Get the user provided options for a Nuxt module.
+ *
+ * These options may not be the resolved options that the module actually uses.
+ */
+declare function getNuxtModuleOptions(module: string | NuxtModule, nuxt?: Nuxt): Promise<Record<string, any>>;
+declare function isNuxtGenerate(nuxt?: Nuxt): boolean;
+/**
+ * Generate TypeScript type augmentations for a Nuxt module.
+ */
+declare function extendTypes(module: string, template: (options: {
+    typesPath: string;
+}) => string | Promise<string>): void;
+/**
+ * Create a promise that resolves when Nuxt pages are resolved.
+ */
+declare function createPagesPromise(nuxt?: Nuxt): Promise<NuxtPage[]>;
+/**
+ * Create a promise that resolves when Nitro is initialized.
+ */
+declare function createNitroPromise(nuxt?: Nuxt): Promise<Nitro>;
+interface NuxtContentVersion {
+    version: 2 | 3;
+}
+/**
+ * Detect which version of @nuxt/content is installed.
+ *
+ * Returns `false` when @nuxt/content is not installed or the version is unrecognised.
+ */
+declare function resolveNuxtContentVersion(): Promise<false | NuxtContentVersion>;
+/**
+ * Read the major version of a non-module package as resolved from `rootDir`.
+ *
+ * Unlike `hasNuxtModuleCompatibility`, this works for plain libraries (e.g.
+ * `unhead`, `@unhead/vue`) that aren't registered as Nuxt modules. Returns
+ * `undefined` when the package can't be resolved or has no parseable version.
+ */
+declare function resolvePackageMajor(id: string, rootDir: string): Promise<number | undefined>;
+type UnheadMajor = 2 | 3;
+/**
+ * Resolve the major of the unhead the host app renders with.
+ *
+ * `@unhead/vue` is what the head-stack packages peer-depend on, so it's the
+ * primary signal; falls back to the core `unhead` package, then to `3` (the
+ * current default major) when neither resolves.
+ *
+ * Used to keep head-stack dependencies on a compatible major. For example,
+ * `@unhead/schema-org` v3 attaches an object `_resolver` to every graph node
+ * that unhead v2's `walkResolver` invokes as a thunk, crashing render; a module
+ * that ships both majors can use this to alias to the matching one.
+ */
+declare function resolveHostUnheadMajor(rootDir: string): Promise<UnheadMajor>;
+
+export { createNitroPromise, createPagesPromise, detectNuxtSeoModules, detectTarget, extendTypes, getNuxtModuleOptions, isNuxtGenerate, renderNitroTypeAugmentations, resolveHostUnheadMajor, resolveNitroPreset, resolveNuxtContentVersion, resolvePackageMajor, setupNitroRuntimeCompatibility, useModuleLogger };
+export type { NitroRuntimeCompatibility, NitroTypeAugmentations, NuxtContentVersion, NuxtSeoModuleDetection, UnheadMajor };

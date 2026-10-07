@@ -1,0 +1,249 @@
+'use strict';
+
+const promises = require('node:fs/promises');
+const defu = require('defu');
+const logger_js = require('../../dist/runtime/logger.js');
+const module$1 = require('../shared/nuxt-og-image.CdpC3njh.cjs');
+require('node:crypto');
+require('node:fs');
+require('node:url');
+require('@nuxt/kit');
+require('fnv1a-64');
+require('nuxt-site-config/kit');
+require('nuxtseo-shared/kit');
+require('pathe');
+require('pkg-types');
+require('std-env');
+require('oxc-walker');
+require('chrome-launcher');
+require('nypm');
+require('nuxtseo-shared/devtools');
+require('unstorage');
+require('unstorage/drivers/fs-lite');
+require('../../dist/runtime/server/og-image/utils/css.js');
+require('magic-string');
+require('strip-literal');
+require('ufo');
+require('unplugin');
+require('@vue/compiler-sfc');
+require('ofetch');
+require('ultrahtml');
+require('../../dist/runtime/server/og-image/core/transforms/emojis/emoji-utils.js');
+require('exsolve');
+require('../shared/nuxt-og-image.CMYbz66P.cjs');
+require('magicast');
+require('magicast/helpers');
+
+const RE_SVG_DATA_URL = /url\("data:image\/svg\+xml[;,]([^"]+)"\)/;
+const RE_UTF8_PREFIX = /^utf8,/;
+const RE_VIEWBOX = /viewBox=['"](\d+)\s+(\d+)\s+(\d+)\s+(\d+)['"]/;
+const RE_WIDTH_ATTR = /\bwidth=['"](\d+)['"]/;
+const RE_HEIGHT_ATTR = /\bheight=['"](\d+)['"]/;
+const RE_SVG_BODY = /<svg[^>]*>([\s\S]*)<\/svg>/;
+let unoConfig = null;
+let rootDir = null;
+let unocssCorePath;
+let unocssConfigPath;
+let generator = null;
+let pendingGenerator = null;
+let cachedExtracted = null;
+function setUnoRootDir(dir) {
+  rootDir = dir;
+}
+function setUnoConfig(config) {
+  unoConfig = config;
+  generator = null;
+}
+function clearUnoUserVarsCache() {
+  cachedExtracted = null;
+}
+function clearUnoCache() {
+  generator = null;
+  pendingGenerator = null;
+  cachedExtracted = null;
+}
+function setUnoModulePaths(options) {
+  const nextCorePath = options?.unocssCorePath;
+  const nextConfigPath = options?.unocssConfigPath;
+  if (nextCorePath === unocssCorePath && nextConfigPath === unocssConfigPath)
+    return;
+  unocssCorePath = nextCorePath;
+  unocssConfigPath = nextConfigPath;
+  clearUnoCache();
+}
+async function getGenerator() {
+  if (generator)
+    return generator;
+  if (pendingGenerator)
+    return pendingGenerator;
+  pendingGenerator = (async () => {
+    let loadedConfig;
+    try {
+      const { loadConfig } = await module$1.importOptionalPeer("@unocss/config", unocssConfigPath, "UnoCSS class extraction with OG images");
+      const result = await loadConfig(rootDir || process.cwd());
+      loadedConfig = result.config;
+    } catch (e) {
+      if (!unoConfig)
+        logger_js.logger.warn("[og-image UnoCSS] Failed to load uno.config.ts:", e.message);
+    }
+    const finalConfig = loadedConfig ? defu.defu(unoConfig || {}, loadedConfig) : unoConfig;
+    if (!finalConfig) {
+      throw new Error("UnoCSS config not found. Ensure uno.config.ts exists or @unocss/nuxt is loaded.");
+    }
+    const { createGenerator } = await module$1.importOptionalPeer("@unocss/core", unocssCorePath, "UnoCSS class extraction with OG images");
+    generator = await createGenerator(finalConfig);
+    return generator;
+  })();
+  const p = pendingGenerator;
+  p.finally(() => {
+    pendingGenerator = null;
+  });
+  return p;
+}
+async function loadExtractedVars(resolveCssPath) {
+  if (cachedExtracted)
+    return cachedExtracted;
+  const empty = { rootVars: /* @__PURE__ */ new Map(), qualifiedRules: [], universalVars: /* @__PURE__ */ new Map(), propertyInitials: /* @__PURE__ */ new Map(), perClassVars: /* @__PURE__ */ new Map() };
+  if (!resolveCssPath) {
+    cachedExtracted = empty;
+    return cachedExtracted;
+  }
+  const cssPath = await resolveCssPath();
+  if (!cssPath) {
+    logger_js.logger.debug("[og-image UnoCSS] No CSS path resolved for user vars");
+    cachedExtracted = empty;
+    return cachedExtracted;
+  }
+  try {
+    const content = await promises.readFile(cssPath, "utf-8");
+    cachedExtracted = await module$1.extractVarsFromCss(content);
+    logger_js.logger.debug(`[og-image UnoCSS] Extracted ${cachedExtracted.rootVars.size} base vars, ${cachedExtracted.qualifiedRules.length} qualified rules from ${cssPath}`);
+  } catch (e) {
+    logger_js.logger.warn("[og-image UnoCSS] Failed to read CSS file for vars:", e.message);
+    cachedExtracted = empty;
+  }
+  return cachedExtracted;
+}
+function resolveUserVars(extracted, rootAttrs) {
+  return module$1.resolveExtractedVars(extracted, rootAttrs);
+}
+function createUnoProvider(options) {
+  setUnoModulePaths(options);
+  return {
+    name: "unocss",
+    async resolveClassesToStyles(classes, context, rootAttrs) {
+      if (classes.length === 0)
+        return {};
+      const baseClasses = module$1.extractVariantBaseClasses(classes);
+      const classesToGenerate = [.../* @__PURE__ */ new Set([...classes, ...baseClasses])];
+      const gen = await getGenerator();
+      const { css } = await gen.generate(classesToGenerate);
+      const simplifiedCss = await module$1.simplifyCss(css);
+      const vars = /* @__PURE__ */ new Map();
+      const extracted = await loadExtractedVars(options?.resolveCssPath);
+      const userVars = resolveUserVars(extracted, rootAttrs || {});
+      for (const [name, value] of userVars)
+        vars.set(name, value);
+      const rootVarsFromCss = module$1.extractCssVars(simplifiedCss);
+      for (const [name, value] of rootVarsFromCss)
+        vars.set(name, value);
+      const propVars = module$1.extractPropertyInitialValues(simplifiedCss);
+      for (const [name, value] of propVars) {
+        if (!vars.has(name))
+          vars.set(name, value);
+      }
+      const uniVars = module$1.extractUniversalVars(simplifiedCss);
+      for (const [name, value] of uniVars) {
+        if (!vars.has(name))
+          vars.set(name, value);
+      }
+      logger_js.logger.debug(`[og-image UnoCSS] Vars: ${userVars.size} user, ${rootVarsFromCss.size} :root, ${propVars.size} @property, ${uniVars.size} universal \u2192 ${vars.size} total`);
+      const perClassVars = module$1.extractPerClassVars(simplifiedCss);
+      const classMap = module$1.extractClassStyles(simplifiedCss, { collectVars: vars, merge: true });
+      const resolvedBaseStyles = /* @__PURE__ */ new Map();
+      for (const [className, rawStyles] of classMap) {
+        const classVars = perClassVars.get(className);
+        const mergedVars = classVars ? new Map([...vars, ...classVars]) : vars;
+        const styles = await module$1.postProcessStyles(rawStyles, mergedVars, void 0, context);
+        if (styles)
+          resolvedBaseStyles.set(className, styles);
+      }
+      return module$1.resolveVariantPrefixes(classes, resolvedBaseStyles);
+    },
+    async extractMetadata() {
+      const gen = await getGenerator();
+      const theme = gen.config.theme || {};
+      const fontVars = {};
+      const breakpoints = {};
+      const colors = {};
+      if (theme.font) {
+        for (const [name, value] of Object.entries(theme.font)) {
+          if (typeof value === "string")
+            fontVars[`font-${name}`] = value;
+        }
+      }
+      if (theme.fontFamily) {
+        for (const [name, value] of Object.entries(theme.fontFamily)) {
+          if (typeof value === "string")
+            fontVars[`font-${name}`] = value;
+        }
+      }
+      if (theme.breakpoints) {
+        for (const [name, value] of Object.entries(theme.breakpoints)) {
+          const px = Number.parseInt(String(value).replace("px", ""), 10);
+          if (!Number.isNaN(px))
+            breakpoints[name] = px;
+        }
+      }
+      if (theme.colors) {
+        for (const [name, value] of Object.entries(theme.colors)) {
+          if (typeof value === "string")
+            colors[name] = value;
+          else if (typeof value === "object" && value !== null)
+            colors[name] = value;
+        }
+      }
+      return { fontVars, breakpoints, colors };
+    },
+    async getVars(rootAttrs) {
+      const extracted = await loadExtractedVars(options?.resolveCssPath);
+      return resolveUserVars(extracted, rootAttrs || {});
+    },
+    clearUserVarsCache: clearUnoUserVarsCache,
+    clearCache: clearUnoCache,
+    async resolveIcon(prefix, name) {
+      const gen = await getGenerator();
+      const iconClass = `i-${prefix}-${name}`;
+      const { css } = await gen.generate([iconClass]);
+      if (!css)
+        return null;
+      const urlMatch = css.match(RE_SVG_DATA_URL);
+      if (!urlMatch?.[1])
+        return null;
+      let svgContent;
+      if (urlMatch[0].includes(";base64,")) {
+        svgContent = Buffer.from(urlMatch[1], "base64").toString("utf-8");
+      } else {
+        const raw = urlMatch[1].replace(RE_UTF8_PREFIX, "");
+        svgContent = decodeURIComponent(raw);
+      }
+      const viewBoxMatch = svgContent.match(RE_VIEWBOX);
+      const widthAttr = svgContent.match(RE_WIDTH_ATTR);
+      const heightAttr = svgContent.match(RE_HEIGHT_ATTR);
+      const width = viewBoxMatch?.[3] ? Number.parseInt(viewBoxMatch[3]) : widthAttr?.[1] ? Number.parseInt(widthAttr[1]) : 24;
+      const height = viewBoxMatch?.[4] ? Number.parseInt(viewBoxMatch[4]) : heightAttr?.[1] ? Number.parseInt(heightAttr[1]) : 24;
+      const bodyMatch = svgContent.match(RE_SVG_BODY);
+      if (!bodyMatch?.[1])
+        return null;
+      return { body: bodyMatch[1], width, height };
+    }
+  };
+}
+
+exports.importResolvedModule = module$1.importResolvedModule;
+exports.resolveOptionalModulePath = module$1.resolveOptionalModulePath;
+exports.clearUnoCache = clearUnoCache;
+exports.clearUnoUserVarsCache = clearUnoUserVarsCache;
+exports.createUnoProvider = createUnoProvider;
+exports.setUnoConfig = setUnoConfig;
+exports.setUnoRootDir = setUnoRootDir;

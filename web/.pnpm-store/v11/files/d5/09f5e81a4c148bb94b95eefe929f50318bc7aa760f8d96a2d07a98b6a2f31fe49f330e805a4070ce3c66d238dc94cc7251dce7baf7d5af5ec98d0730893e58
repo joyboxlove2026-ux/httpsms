@@ -1,0 +1,17 @@
+import { PublicProps, ShallowUnwrapRef, VNode } from 'vue';
+import { VSelect } from 'vuetify/components';
+import { VPhoneCountryInputComponent, VPhoneInputCountryObject, VPhoneInputEmits, VPhoneInputExposed, VPhoneInputProps, VPhoneInputSlots } from '../types.ts';
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+type VPhoneInputComponent = <Country extends VPhoneInputCountryObject = VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent = typeof VSelect>(props: NonNullable<Awaited<typeof setup>>["props"], ctx?: Pick<NonNullable<Awaited<typeof setup>>, "attrs" | "emit" | "slots">, expose?: NonNullable<Awaited<typeof setup>>["expose"], setup?: Promise<{
+    props: VPhoneInputProps<Country, CountryInputComponent> & PublicProps;
+    expose(exposed: ShallowUnwrapRef<VPhoneInputExposed<Country, CountryInputComponent>>): void;
+    attrs: any;
+    slots: VPhoneInputSlots<Country, CountryInputComponent>;
+    emit: UnionToIntersection<{
+        [K in keyof VPhoneInputEmits<Country>]: (event: K, ...args: VPhoneInputEmits<Country>[K]) => void;
+    }[keyof VPhoneInputEmits<Country>]>;
+}>) => VNode & {
+    __ctx?: Awaited<typeof setup>;
+};
+declare const VPhoneInput: VPhoneInputComponent;
+export default VPhoneInput;

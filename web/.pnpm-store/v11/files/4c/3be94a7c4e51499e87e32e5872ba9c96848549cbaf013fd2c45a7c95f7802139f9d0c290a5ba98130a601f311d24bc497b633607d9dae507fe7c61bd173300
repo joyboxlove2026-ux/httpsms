@@ -1,0 +1,67 @@
+import { Component, HTMLAttributes, PropType, ReservedProps } from 'vue';
+import { ComponentProps } from 'vue-component-type-helpers';
+import { VTextField } from 'vuetify/components';
+import { VPhoneCountryDisplayProps, VPhoneCountryInputComponent, VPhoneInputCountryObject, VPhoneInputMessage } from '../types.ts';
+import { default as makePhoneInputComposableProps } from './makePhoneInputComposableProps.ts';
+declare function makePhoneInputComponentSpecificProps<Country extends VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent>(): {
+    /**
+     * Country input component.
+     *
+     * @internal Use `usePhoneInput` instead if you want to use a custom component.
+     */
+    readonly countryInputComponent: {
+        readonly type: PropType<CountryInputComponent>;
+    };
+    /**
+     * Country input component specific props.
+     *
+     * @internal Use `countryProps` property instead.
+     */
+    readonly countryInputComponentProps: {
+        readonly type: PropType<ComponentProps<CountryInputComponent>>;
+    };
+    /**
+     * Country display component.
+     */
+    readonly countryDisplayComponent: {
+        readonly type: PropType<Component<VPhoneCountryDisplayProps<Country>>>;
+    };
+    /**
+     * Toggle country input loading state whenever a country is currently guessing.
+     */
+    readonly guessLoading: {
+        readonly type: PropType<boolean>;
+        readonly default: symbol;
+    };
+    /**
+     * Properties to pass to the wrapper div.
+     */
+    readonly wrapperAttrs: {
+        readonly type: PropType<HTMLAttributes & ReservedProps & Record<string, unknown>>;
+    };
+    /**
+     * Properties to pass to the country input (`VSelect` or `VAutocomplete`).
+     */
+    readonly countryProps: {
+        readonly type: PropType<ComponentProps<CountryInputComponent>>;
+    };
+    /**
+     * Properties to pass to the country input (`VTextField`).
+     */
+    readonly phoneProps: {
+        readonly type: PropType<ComponentProps<typeof VTextField>>;
+    };
+    /**
+     * Customize the phone input hint.
+     */
+    readonly hint: {
+        readonly type: PropType<VPhoneInputMessage<Country>>;
+    };
+};
+/**
+ * Make phone input properties definition.
+ *
+ * @internal
+ */
+export default function makePhoneInputProps<Country extends VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent>(): ReturnType<typeof makePhoneInputComposableProps<Country>> & ReturnType<typeof makePhoneInputComponentSpecificProps<Country, CountryInputComponent>>;
+export {};

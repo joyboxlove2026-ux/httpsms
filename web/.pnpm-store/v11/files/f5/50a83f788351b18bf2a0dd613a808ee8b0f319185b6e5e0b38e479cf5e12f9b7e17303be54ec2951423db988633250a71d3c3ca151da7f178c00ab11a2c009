@@ -1,0 +1,7 @@
+/**
+ * Unique symbol to identify undefined boolean properties.
+ *
+ * @internal
+ */
+declare const _default: symbol;
+export default _default;

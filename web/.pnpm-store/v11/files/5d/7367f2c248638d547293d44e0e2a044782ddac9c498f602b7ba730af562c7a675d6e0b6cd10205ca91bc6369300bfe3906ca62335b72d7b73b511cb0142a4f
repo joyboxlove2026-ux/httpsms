@@ -1,0 +1,11 @@
+export { createFilter } from "nuxtseo-shared/utils";
+export function serializeFilterEntries(entries) {
+  return entries.map(
+    (e) => e instanceof RegExp ? { __regexp__: true, source: e.source, flags: e.flags } : e
+  );
+}
+export function deserializeFilterEntries(entries) {
+  return entries.map(
+    (e) => typeof e === "object" && e !== null && "__regexp__" in e ? new RegExp(e.source, e.flags) : e
+  );
+}

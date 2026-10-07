@@ -1,0 +1,7 @@
+import { VPhoneCountryInputComponent, VPhoneInputCountryObject, VPhoneInputPluginOptions } from '../types';
+/**
+ * Provide given phone input options to current Vue context.
+ *
+ * @param options
+ */
+export default function providePhoneInputOptions<Country extends VPhoneInputCountryObject = VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent = VPhoneCountryInputComponent>(options: VPhoneInputPluginOptions<Country, CountryInputComponent>): void;

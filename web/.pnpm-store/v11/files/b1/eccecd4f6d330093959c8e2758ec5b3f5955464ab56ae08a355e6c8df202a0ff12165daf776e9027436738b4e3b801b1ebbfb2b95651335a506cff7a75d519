@@ -1,0 +1,18 @@
+declare const _default: import("h3").EventHandler<import("h3").EventHandlerRequest, {
+    runtimeConfig: any;
+    siteConfig: {
+        url: string;
+        name: any;
+        description: any;
+        env: any;
+        indexable: any;
+        trailingSlash: any;
+        titleSeparator: any;
+        defaultLocale: any;
+        currentLocale: any;
+        twitter: any;
+    };
+    headConfig: any;
+    path: string | number | true | Record<string, any> | import("ufo").QueryValue[];
+}>;
+export default _default;

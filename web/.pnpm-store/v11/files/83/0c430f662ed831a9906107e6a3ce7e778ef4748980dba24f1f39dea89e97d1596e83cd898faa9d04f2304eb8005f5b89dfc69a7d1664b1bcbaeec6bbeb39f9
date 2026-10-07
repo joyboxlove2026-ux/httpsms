@@ -1,0 +1,7 @@
+/**
+ * VPhoneInput properties which are forwarded to both country and phone input.
+ *
+ * @internal
+ */
+declare const _default: readonly ["variant", "flat", "tile", "density", "singleLine", "hideDetails", "reverse", "color", "bgColor", "theme", "disabled", "readonly", "rounded"];
+export default _default;

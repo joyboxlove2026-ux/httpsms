@@ -1,0 +1,29 @@
+import { injectHead, useSeoMeta } from "@unhead/vue";
+import { defineNuxtPlugin, getRouteRules, useRequestEvent, useRuntimeConfig, useState } from "nuxt/app";
+export default defineNuxtPlugin({
+  enforce: "post",
+  env: { islands: false },
+  async setup() {
+    const head = injectHead();
+    if (!head)
+      return;
+    const { tagPriority } = useRuntimeConfig().public["seo-utils"];
+    const routeRuleState = useState("nuxt-seo-utils:routeRules", () => null);
+    if (import.meta.server) {
+      const event = useRequestEvent();
+      const routeRules = await getRouteRules(event);
+      const rules = routeRules;
+      routeRuleState.value = {
+        head: rules.head,
+        seoMeta: rules.seoMeta
+      };
+    }
+    if (routeRuleState.value) {
+      const { head: headInput, seoMeta } = routeRuleState.value;
+      if (headInput)
+        head.push(headInput);
+      if (seoMeta)
+        useSeoMeta(seoMeta, { tagPriority });
+    }
+  }
+});

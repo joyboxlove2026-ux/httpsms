@@ -1,0 +1,114 @@
+import { createDefu } from "defu";
+import { createFilter, createModuleLogger } from "nuxtseo-shared/utils";
+import { parseURL, withoutBase } from "ufo";
+export { createFilter } from "nuxtseo-shared/utils";
+export const logger = createModuleLogger("@nuxt/sitemap");
+const XML_ENTITIES = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&apos;"
+};
+const XML_SPECIAL_CHARS_RE = /[&<>"']/g;
+const HAS_XML_SPECIAL_CHARS_RE = /[&<>"']/;
+export function xmlEscape(value) {
+  const input = String(value);
+  return HAS_XML_SPECIAL_CHARS_RE.test(input) ? input.replace(XML_SPECIAL_CHARS_RE, (char) => XML_ENTITIES[char]) : input;
+}
+const merger = createDefu((obj, key, value) => {
+  if (Array.isArray(obj[key]) && Array.isArray(value))
+    obj[key] = Array.from(/* @__PURE__ */ new Set([...obj[key], ...value]));
+  return obj[key];
+});
+export function mergeOnKey(arr, key, onMerge) {
+  if (arr.length < 2)
+    return arr;
+  const seen = /* @__PURE__ */ new Map();
+  let resultLength = 0;
+  for (const item of arr) {
+    const k = item[key];
+    if (seen.has(k)) {
+      const existingIndex = seen.get(k);
+      onMerge?.(item[key]);
+      arr[existingIndex] = merger(item, arr[existingIndex]);
+    } else {
+      seen.set(k, resultLength);
+      arr[resultLength++] = item;
+    }
+  }
+  arr.length = resultLength;
+  return arr;
+}
+export function splitForLocales(path, locales) {
+  const start = path.charCodeAt(0) === 47 ? 1 : 0;
+  const end = path.indexOf("/", start);
+  const prefix = path.slice(start, end === -1 ? path.length : end);
+  const hasLocale = locales instanceof Set ? locales.has(prefix) : locales.includes(prefix);
+  if (prefix && hasLocale) {
+    const prefixEnd = start + prefix.length;
+    return [prefix, start === 1 ? path.slice(prefixEnd) : path];
+  }
+  return [null, path];
+}
+export function resolveI18nSitemapLocaleKey(sitemapName, localeSitemapKeys) {
+  let best = null;
+  for (const key of localeSitemapKeys) {
+    if (sitemapName === key || sitemapName.startsWith(`${key}-`)) {
+      if (best === null || key.length > best.length)
+        best = key;
+    }
+  }
+  return best;
+}
+const StringifiedRegExpPattern = /\/(.*?)\/([gimsuy]*)$/;
+export function normalizeRuntimeFilters(input) {
+  return (input || []).map((rule) => {
+    if (rule instanceof RegExp || typeof rule === "string")
+      return rule;
+    const match = rule.regex.match(StringifiedRegExpPattern);
+    if (match)
+      return new RegExp(match[1], match[2]);
+    return false;
+  }).filter(Boolean);
+}
+export function createPathFilter(options = {}, baseURL) {
+  const urlFilter = createFilter({
+    include: normalizeRuntimeFilters(options.include),
+    exclude: normalizeRuntimeFilters(options.exclude)
+  });
+  const hasBase = baseURL && baseURL !== "/";
+  return (loc, pathname) => {
+    let path = pathname;
+    if (typeof path !== "string") {
+      try {
+        path = parseURL(loc).pathname;
+      } catch {
+        return false;
+      }
+    }
+    if (hasBase)
+      path = withoutBase(path, baseURL);
+    return urlFilter(path);
+  };
+}
+export function findPageMapping(pathWithoutPrefix, pages, sortedKeys) {
+  const stripped = pathWithoutPrefix[0] === "/" ? pathWithoutPrefix.slice(1) : pathWithoutPrefix;
+  const pageKey = stripped.endsWith("/index") ? stripped.slice(0, -6) || "index" : stripped || "index";
+  if (pages[pageKey])
+    return { mappings: pages[pageKey], paramSegments: [] };
+  const keys = sortedKeys || Object.keys(pages).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (pageKey.startsWith(`${key}/`)) {
+      const paramPath = pageKey.slice(key.length + 1);
+      return { mappings: pages[key], paramSegments: paramPath.split("/") };
+    }
+  }
+  return null;
+}
+export function applyDynamicParams(customPath, paramSegments) {
+  if (!paramSegments.length)
+    return customPath;
+  let i = 0;
+  return customPath.replace(/\[[^\]]+\]/g, () => paramSegments[i++] || "");
+}

@@ -1,0 +1,6 @@
+/**
+ * Guess phone country using ip2c.org service.
+ *
+ * @see https://about.ip2c.org/
+ */
+export default function guessPhoneCountry(): Promise<string | undefined>;

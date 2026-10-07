@@ -1,0 +1,11 @@
+import { MaybeRef, UnwrapRef } from 'vue';
+import { VPhoneCountryInputComponent, VPhoneInputCountryObject } from '../types.ts';
+/**
+ * Composable to use injected options with currently passed properties or options.
+ *
+ * @internal
+ */
+export default function usePhoneInputPluginOptions<Country extends VPhoneInputCountryObject = VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent = VPhoneCountryInputComponent>(): {
+    getOption: <K extends keyof T & keyof import('../types.ts').VPhoneInputPluginOptions<Country, CountryInputComponent>, T, D = undefined>(key: K, options: T, defaultValue?: D) => Exclude<UnwrapRef<T[K]> | UnwrapRef<import('../types.ts').VPhoneInputPluginOptions<Country, CountryInputComponent>[K]>, undefined> | D;
+    useOption: <K extends keyof T & keyof import('../types.ts').VPhoneInputPluginOptions<Country, CountryInputComponent>, T, D = undefined>(key: K, options: T, defaultValue?: MaybeRef<D>) => import('vue').ComputedRef<D | Exclude<UnwrapRef<T[K]>, undefined> | Exclude<UnwrapRef<import('../types.ts').VPhoneInputPluginOptions<Country, CountryInputComponent>[K]>, undefined>>;
+};

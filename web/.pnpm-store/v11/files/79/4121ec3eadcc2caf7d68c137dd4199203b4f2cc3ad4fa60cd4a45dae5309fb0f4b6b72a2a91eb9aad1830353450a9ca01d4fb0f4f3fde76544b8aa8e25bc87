@@ -1,0 +1,161 @@
+import { getNuxtModuleVersion, hasNuxtModuleCompatibility, hasNuxtModule } from '@nuxt/kit';
+import { joinURL, withHttps, withBase, withLeadingSlash } from 'ufo';
+import { getNuxtModuleOptions } from './kit.mjs';
+import 'node:url';
+import 'pathe';
+import 'pkg-types';
+import 'std-env';
+
+const I18N_MODULES = ["@nuxtjs/i18n", "nuxt-i18n-micro"];
+const SLASH_PATTERN = /^\/|\/$/g;
+function generatePathForI18nPages(ctx) {
+  const { localeCode, pageLocales, nuxtI18nConfig, forcedStrategy, normalisedLocales } = ctx;
+  const locale = normalisedLocales.find((l) => l.code === localeCode);
+  let path = pageLocales;
+  switch (forcedStrategy ?? nuxtI18nConfig.strategy) {
+    case "prefix_except_default":
+    case "prefix_and_default":
+      path = localeCode === nuxtI18nConfig.defaultLocale ? pageLocales : joinURL(localeCode, pageLocales);
+      break;
+    case "prefix":
+      path = joinURL(localeCode, pageLocales);
+      break;
+  }
+  return locale?.domain ? withHttps(withBase(path, locale.domain)) : path;
+}
+function splitPathForI18nLocales(path, autoI18n) {
+  const locales = autoI18n.strategy === "prefix_except_default" ? autoI18n.locales.filter((l) => l.code !== autoI18n.defaultLocale) : autoI18n.locales;
+  if (!path || path.startsWith("/_"))
+    return path;
+  const hasLocalePrefix = locales.some((l) => path.startsWith(`/${l.code}/`) || path === `/${l.code}`);
+  if (hasLocalePrefix)
+    return path;
+  return [
+    path,
+    ...locales.map((l) => `/${l.code}${path}`)
+  ];
+}
+const COMPACT_LOCALE_PATTERN = /^\/:locale\(([^)]+)\)/;
+function isCompactLocaleRoute(path) {
+  return COMPACT_LOCALE_PATTERN.test(path);
+}
+function expandCompactLocaleRoute(path, knownLocales) {
+  const match = COMPACT_LOCALE_PATTERN.exec(path);
+  if (!match?.[1])
+    return null;
+  const locales = match[1].split("|");
+  if (knownLocales?.length && !locales.some((l) => knownLocales.includes(l)))
+    return null;
+  return locales.map((locale) => ({
+    locale,
+    path: path.replace(COMPACT_LOCALE_PATTERN, `/${locale}`)
+  }));
+}
+function normalizeLocales(nuxtI18nConfig) {
+  const rawLocales = nuxtI18nConfig.locales || [];
+  let onlyLocales = nuxtI18nConfig?.bundle?.onlyLocales || [];
+  onlyLocales = typeof onlyLocales === "string" ? [onlyLocales] : onlyLocales;
+  let locales = mergeOnKey(rawLocales.map((locale) => typeof locale === "string" ? { code: locale } : locale), "code");
+  if (onlyLocales.length) {
+    locales = locales.filter((locale) => onlyLocales.includes(locale.code));
+  }
+  return locales.map((locale) => {
+    if (typeof locale.iso === "string" && !locale.language) {
+      locale.language = locale.iso;
+    }
+    const _hreflang = locale.language || locale.code;
+    const _sitemap = locale.language || locale.code;
+    return { ...locale, _hreflang, _sitemap };
+  });
+}
+function mapPathForI18nPages(path, autoI18n) {
+  const pages = autoI18n.pages;
+  if (!pages || !Object.keys(pages).length)
+    return false;
+  const withoutSlashes = path.replace(SLASH_PATTERN, "").replace("/index", "");
+  function resolveForAllLocales(pageName, pageLocales) {
+    return autoI18n.locales.filter((l) => {
+      if (l.code in pageLocales && pageLocales[l.code] === false)
+        return false;
+      if (autoI18n.strategy === "prefix_except_default" && l.code === autoI18n.defaultLocale)
+        return false;
+      return true;
+    }).map((l) => {
+      const localePath = l.code in pageLocales && pageLocales[l.code] !== false ? pageLocales[l.code] : `/${pageName}`;
+      return withLeadingSlash(generatePathForI18nPages({
+        localeCode: l.code,
+        pageLocales: localePath,
+        nuxtI18nConfig: { strategy: autoI18n.strategy, defaultLocale: autoI18n.defaultLocale },
+        normalisedLocales: autoI18n.locales
+      }));
+    });
+  }
+  if (withoutSlashes in pages) {
+    const pageLocales = pages[withoutSlashes];
+    if (pageLocales)
+      return resolveForAllLocales(withoutSlashes, pageLocales);
+  }
+  for (const [pageName, pageLocales] of Object.entries(pages)) {
+    if (!pageLocales)
+      continue;
+    if (autoI18n.defaultLocale in pageLocales && pageLocales[autoI18n.defaultLocale] === path)
+      return resolveForAllLocales(pageName, pageLocales);
+  }
+  return false;
+}
+function resolveI18nModule() {
+  const found = I18N_MODULES.find((m) => hasNuxtModule(m));
+  if (!found)
+    return false;
+  return {
+    module: found,
+    isMicro: found === "nuxt-i18n-micro"
+  };
+}
+function resolveI18nPages(config, isMicro) {
+  const routes = isMicro ? config.globalLocaleRoutes : config.pages;
+  if (!routes)
+    return void 0;
+  return Object.fromEntries(
+    Object.entries(routes).filter((entry) => typeof entry[1] === "object" && entry[1] !== null && !Array.isArray(entry[1]))
+  );
+}
+async function resolveI18nConfig(logger) {
+  const i18n = resolveI18nModule();
+  if (!i18n)
+    return false;
+  if (!i18n.isMicro) {
+    const i18nVersion = await getNuxtModuleVersion(i18n.module);
+    if (!await hasNuxtModuleCompatibility(i18n.module, ">=8")) {
+      logger?.warn(`You are using ${i18n.module} v${i18nVersion}. For the best compatibility, please upgrade to ${i18n.module} v8.0.0 or higher.`);
+    }
+  }
+  const nuxtI18nConfig = await getNuxtModuleOptions(i18n.module) || {};
+  const normalisedLocales = normalizeLocales(nuxtI18nConfig);
+  const pages = resolveI18nPages(nuxtI18nConfig, i18n.isMicro);
+  const usingI18nPages = Object.keys(pages || {}).length;
+  const hasI18nConfigForAlternatives = nuxtI18nConfig.differentDomains || usingI18nPages || nuxtI18nConfig.strategy !== "no_prefix" && nuxtI18nConfig.locales;
+  if (!hasI18nConfigForAlternatives)
+    return false;
+  return {
+    differentDomains: nuxtI18nConfig.differentDomains,
+    defaultLocale: nuxtI18nConfig.defaultLocale,
+    locales: normalisedLocales,
+    strategy: nuxtI18nConfig.strategy,
+    pages
+  };
+}
+function mergeOnKey(arr, key) {
+  const map = /* @__PURE__ */ new Map();
+  for (const item of arr) {
+    const k = item[key];
+    if (map.has(k)) {
+      map.set(k, { ...map.get(k), ...item });
+    } else {
+      map.set(k, item);
+    }
+  }
+  return [...map.values()];
+}
+
+export { expandCompactLocaleRoute, generatePathForI18nPages, isCompactLocaleRoute, mapPathForI18nPages, mergeOnKey, normalizeLocales, resolveI18nConfig, resolveI18nModule, splitPathForI18nLocales };

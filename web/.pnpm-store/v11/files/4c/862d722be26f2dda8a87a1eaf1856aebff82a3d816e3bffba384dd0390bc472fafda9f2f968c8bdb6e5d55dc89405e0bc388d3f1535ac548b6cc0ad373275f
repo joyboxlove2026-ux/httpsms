@@ -1,0 +1,8 @@
+import { Plugin } from 'vue';
+import { VPhoneCountryInputComponent, VPhoneInputCountryObject, VPhoneInputPluginOptions } from './types';
+/**
+ * Provide given options to app and register `VPhoneInput` component.
+ *
+ * @param options
+ */
+export default function createVPhoneInput<Country extends VPhoneInputCountryObject = VPhoneInputCountryObject, CountryInputComponent extends VPhoneCountryInputComponent = VPhoneCountryInputComponent>(options?: VPhoneInputPluginOptions<Country, CountryInputComponent>): Plugin<[] | [VPhoneInputPluginOptions<Country, CountryInputComponent>]>;

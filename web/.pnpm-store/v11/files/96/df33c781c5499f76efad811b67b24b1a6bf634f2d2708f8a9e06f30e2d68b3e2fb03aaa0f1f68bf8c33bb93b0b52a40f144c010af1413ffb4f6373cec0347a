@@ -1,0 +1,23 @@
+import { PropType } from 'vue';
+import { VPhoneInputCountryObject } from '../types.ts';
+/**
+ * Make phone input country display properties definition.
+ *
+ * @internal
+ */
+export default function makePhoneInputCountryDisplayProps<Country extends VPhoneInputCountryObject>(): {
+    /**
+     * Country to display.
+     */
+    readonly country: {
+        readonly required: true;
+        readonly type: PropType<Country>;
+    };
+    /**
+     * Tells if the icon should be ignored by screen readers or if it must have
+     * an accessible name (e.g. through `title` attribute).
+     */
+    readonly decorative: {
+        readonly type: PropType<boolean>;
+    };
+};

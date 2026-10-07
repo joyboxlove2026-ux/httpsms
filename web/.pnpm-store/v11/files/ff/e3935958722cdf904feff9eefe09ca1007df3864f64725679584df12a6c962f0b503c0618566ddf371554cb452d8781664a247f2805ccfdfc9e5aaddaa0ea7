@@ -1,0 +1,15 @@
+import { Ref } from 'vue';
+import { VPhoneInputCountryGuesserResult } from '../types';
+/**
+ * Create a memoized guess country function with memoization getter and setter.
+ */
+declare function memoizeGuessPhoneCountry<Guess extends () => Promise<VPhoneInputCountryGuesserResult> | VPhoneInputCountryGuesserResult>(guess: Guess, get: () => string | null, set: (value: string | null) => void): Guess & {
+    memoized: string | null;
+};
+/**
+ * Create a memoized guess country function with a memoization ref.
+ */
+declare function memoizeGuessPhoneCountry<Guess extends () => Promise<VPhoneInputCountryGuesserResult> | VPhoneInputCountryGuesserResult>(guess: Guess, ref: Ref<string | null>): Guess & {
+    memoized: Ref<string | null>;
+};
+export default memoizeGuessPhoneCountry;

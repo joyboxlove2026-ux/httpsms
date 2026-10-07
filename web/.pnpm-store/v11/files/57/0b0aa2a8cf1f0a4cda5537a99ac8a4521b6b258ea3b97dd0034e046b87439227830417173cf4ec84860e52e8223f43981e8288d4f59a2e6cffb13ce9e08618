@@ -1,0 +1,9 @@
+export { createFilter, type CreateFilterOptions } from 'nuxtseo-shared/utils';
+export interface SerializedRegExp {
+    __regexp__: true;
+    source: string;
+    flags: string;
+}
+export type SerializedFilterEntry = string | SerializedRegExp;
+export declare function serializeFilterEntries(entries: (string | RegExp)[]): SerializedFilterEntry[];
+export declare function deserializeFilterEntries(entries: SerializedFilterEntry[]): (string | RegExp)[];

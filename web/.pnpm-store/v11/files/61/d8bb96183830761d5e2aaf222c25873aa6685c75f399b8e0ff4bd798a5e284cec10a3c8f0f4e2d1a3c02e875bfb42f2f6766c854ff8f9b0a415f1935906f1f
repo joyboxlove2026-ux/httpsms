@@ -1,0 +1,18 @@
+import { default as VPhoneCountryFlagSprite } from './components/VPhoneCountryFlagSprite';
+import { default as VPhoneCountryFlagSvg } from './components/VPhoneCountryFlagSvg';
+import { default as VPhoneInput } from './components/VPhoneInput.ts';
+import { default as usePhoneInput } from './composables/usePhoneInput';
+import { default as createVPhoneInput } from './createVPhoneInput';
+import { default as vPhoneInputSharedProperties } from './internals/vPhoneInputSharedProperties';
+import { default as autocompletePhoneCountryInput } from './utilities/autocompletePhoneCountryInput';
+import { default as guessPhoneCountry } from './utilities/guessPhoneCountry';
+import { default as memoizeGuessPhoneCountry } from './utilities/memoizeGuessPhoneCountry';
+import { default as providePhoneInputOptions } from './utilities/providePhoneInputOptions.ts';
+import { default as selectPhoneCountryInput } from './utilities/selectPhoneCountryInput';
+export * from './types';
+export { VPhoneCountryFlagSvg, VPhoneCountryFlagSprite, VPhoneInput, usePhoneInput, createVPhoneInput, selectPhoneCountryInput, autocompletePhoneCountryInput, providePhoneInputOptions, guessPhoneCountry, memoizeGuessPhoneCountry, vPhoneInputSharedProperties, };
+declare module "vue" {
+    interface GlobalComponents {
+        VPhoneInput: typeof VPhoneInput;
+    }
+}

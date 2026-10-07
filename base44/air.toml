@@ -1,0 +1,22 @@
+# Live reload config for the httpSMS API in the Base44 sandbox.
+# Mounted read-only at /app/.air.toml by docker-compose.base44.yml.
+root = "."
+tmp_dir = "/tmp/air"
+
+[build]
+  cmd = "go build -o /tmp/httpsms ."
+  bin = "/tmp/httpsms"
+  # main.go skips loading a .env file as soon as it is given an argument.
+  args_bin = ["--dotenv=false"]
+  delay = 1000
+  include_ext = ["go"]
+  exclude_dir = ["docs", ".git", "base44"]
+  exclude_regex = ["_test.go"]
+  kill_delay = "3s"
+  stop_on_error = true
+
+[log]
+  main_only = true
+
+[misc]
+  clean_on_exit = true

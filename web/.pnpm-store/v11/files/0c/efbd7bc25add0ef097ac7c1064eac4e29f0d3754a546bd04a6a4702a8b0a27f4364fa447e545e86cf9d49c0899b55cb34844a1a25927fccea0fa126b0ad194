@@ -1,0 +1,17 @@
+import { VPhoneCountryDisplayProps, VPhoneInputCountryObject } from '../types';
+/**
+ * Get country icon attributes.
+ *
+ * @param props
+ *
+ * @internal
+ */
+export default function getPhoneCountryIconAttrs(props: VPhoneCountryDisplayProps<VPhoneInputCountryObject>): {
+    role?: undefined;
+    title?: undefined;
+    "aria-label"?: undefined;
+} | {
+    role: string;
+    title: string;
+    "aria-label": string;
+};

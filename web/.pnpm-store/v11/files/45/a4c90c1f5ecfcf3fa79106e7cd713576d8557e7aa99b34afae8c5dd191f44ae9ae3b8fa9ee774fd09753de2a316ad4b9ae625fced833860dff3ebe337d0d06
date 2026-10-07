@@ -1,0 +1,77 @@
+import { PropType } from 'vue';
+import { VPhoneInputCountryObject, VPhoneInputCountryObjectOrIso2 } from '../types.ts';
+/**
+ * Make phone input country composable properties definition.
+ *
+ * @internal
+ */
+export default function makePhoneInputCountryProps<Country extends VPhoneInputCountryObject>(): {
+    /**
+     * Locale to use when localizing country names.
+     *
+     * @defaultValue
+     * `'en'`
+     */
+    readonly countryLocale: {
+        readonly type: PropType<string>;
+    };
+    /**
+     * Resolve a country name from its ISO-2 code.
+     *
+     * @defaultValue
+     * Uses `Intl.DisplayNames` to localize the country name in defined `countryLocale`.
+     */
+    readonly countryName: {
+        readonly type: PropType<(iso2: string) => string>;
+    };
+    /**
+     * List of available countries.
+     *
+     * @defaultValue
+     * Uses `countries-list` two-letter codes, dial codes resolved using
+     * `awesome-phonenumber` package's `getCountryCodeForRegionCode`, and
+     * given locale (or `en`) translated names using `Intl.DisplayNames`.
+     */
+    readonly countries: {
+        readonly type: PropType<Country[]>;
+    };
+    /**
+     * List of countries to prefer.
+     *
+     * @remarks
+     * When specified, any country which is in the list will appear first
+     * in available countries.
+     */
+    readonly preferCountries: {
+        readonly type: PropType<VPhoneInputCountryObjectOrIso2[]>;
+    };
+    /**
+     * List of countries to include.
+     *
+     * @remarks
+     * When specified, any country which is not in this list will be excluded
+     * from available countries.
+     */
+    readonly includeCountries: {
+        readonly type: PropType<VPhoneInputCountryObjectOrIso2[]>;
+    };
+    /**
+     * List of countries to exclude.
+     *
+     * @remarks
+     * When specified, any country which is in this list will be excluded
+     * from available countries.
+     */
+    readonly excludeCountries: {
+        readonly type: PropType<VPhoneInputCountryObjectOrIso2[]>;
+    };
+    /**
+     * Default country to use.
+     *
+     * @defaultValue
+     * First country from the available `countries` list.
+     */
+    readonly defaultCountry: {
+        readonly type: PropType<VPhoneInputCountryObjectOrIso2>;
+    };
+};

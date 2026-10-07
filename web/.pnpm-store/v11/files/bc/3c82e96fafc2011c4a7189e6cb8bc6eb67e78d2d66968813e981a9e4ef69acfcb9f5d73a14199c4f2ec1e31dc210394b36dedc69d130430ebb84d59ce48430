@@ -1,0 +1,58 @@
+import { T as Thing, S as SchemaOrgNodeDefinition, M as MetaInput, R as ResolvedMeta, a as SchemaOrgGraph, N as NodeRelation } from './shared/schema-org.DP3Hfenn.js';
+export { A as AggregateOffer, b as AggregateOfferSimple, c as AggregateRating, d as AggregateRatingSimple, e as Arrayable, f as Article, g as ArticleSimple, B as Book, h as BookEdition, i as BookEditionSimple, j as BookSimple, k as BreadcrumbList, l as BreadcrumbSimple, C as Comment, m as CommentSimple, n as Course, o as CourseSimple, D as DataCatalog, p as DataDownload, q as Dataset, r as DatasetSimple, s as DefinedRegion, E as Event, t as EventSimple, F as FoodEstablishment, u as FoodEstablishmentSimple, H as HowTo, v as HowToDirection, w as HowToId, x as HowToSimple, y as HowToStep, z as HowToStepSimple, I as Id, G as IdReference, J as Identity, K as ImageObject, L as ImageSimple, O as ItemList, P as ItemListSimple, Q as JobPosting, U as JobPostingSimple, V as ListItem, W as ListItemSimple, X as LocalBusiness, Y as LocalBusinessSimple, Z as MerchantReturnPolicy, _ as MerchantReturnPolicySimple, $ as MonetaryAmount, a0 as MonetaryAmountSimple, a1 as Movie, a2 as MovieSimple, a3 as MusicAlbum, a4 as MusicAlbumSimple, a5 as MusicGroup, a6 as MusicGroupSimple, a7 as MusicPlaylist, a8 as MusicPlaylistSimple, a9 as MusicRecording, aa as MusicRecordingSimple, ab as NodeRelations, ac as NutritionInformation, ad as Offer, ae as OfferShippingDetails, af as OfferSimple, ag as OpeningHoursSimple, ah as OpeningHoursSpecification, ai as OptionalSchemaOrgPrefix, aj as Organization, ak as OrganizationSimple, al as Person, am as PersonSimple, an as Place, ao as PlaceSimple, ap as PodcastEpisode, aq as PodcastEpisodeSimple, ar as PodcastSeason, as as PodcastSeasonSimple, at as PodcastSeries, au as PodcastSeriesSimple, av as PostalAddress, aw as PostalAddressName, ax as PostalAddressSimple, ay as PostalAddressStrict, az as PrimaryArticleId, aA as PrimaryBookId, aB as PrimaryBreadcrumbId, aC as PrimaryDatasetId, aD as PrimaryEventId, aE as PrimaryWebPageId, aF as PrimaryWebSiteId, aG as Product, aH as ProductId, aI as ProductSimple, aJ as QuantitativeSimple, aK as QuantitativeValue, aL as Question, aM as QuestionSimple, aN as Rating, aO as RatingSimple, aP as ReadAction, aQ as ReadActionInput, aR as Recipe, aS as RecipeId, aT as RecipeSimple, aU as ResolvableDate, aV as Review, aW as ReviewSimple, aX as SchemaOrgNode, aY as SearchAction, aZ as SearchActionInput, a_ as Service, a$ as ServiceChannel, b0 as ServiceId, b1 as ServiceSimple, b2 as ShippingDeliveryTime, b3 as SoftwareApp, b4 as SoftwareAppSimple, b5 as TVEpisode, b6 as TVEpisodeSimple, b7 as TVSeason, b8 as TVSeasonSimple, b9 as TVSeries, ba as TVSeriesSimple, bb as UserConfig, bc as VideoObject, bd as VideoSimple, be as VirtualLocation, bf as VirtualLocationSimple, bg as WebPage, bh as WebPageSimple, bi as WebSite, bj as WebSiteSimple, bk as WithResolver, bl as addressResolver, bm as aggregateOfferResolver, bn as aggregateRatingResolver, bo as articleResolver, bp as bookEditionResolver, bq as bookResolver, br as breadcrumbResolver, bs as commentResolver, bt as courseResolver, bu as createSchemaOrgGraph, bv as datasetResolver, bw as eventResolver, bx as foodEstablishmentResolver, by as howToResolver, bz as howToStepDirectionResolver, bA as howToStepResolver, bB as imageResolver, bC as isImageObject, bD as itemListResolver, bE as jobPostingResolver, bF as listItemResolver, bG as localBusinessResolver, bH as movieResolver, bI as musicAlbumResolver, bJ as musicGroupResolver, bK as musicPlaylistResolver, bL as musicRecordingResolver, bM as offerResolver, bN as openingHoursResolver, bO as organizationResolver, bP as personResolver, bQ as placeResolver, bR as podcastEpisodeResolver, bS as podcastSeasonResolver, bT as podcastSeriesResolver, bU as productResolver, bV as questionResolver, bW as ratingResolver, bX as readActionResolver, bY as recipeResolver, bZ as reviewResolver, b_ as searchActionResolver, b$ as serviceResolver, c0 as softwareAppResolver, c1 as tvEpisodeResolver, c2 as tvSeasonResolver, c3 as tvSeriesResolver, c4 as videoResolver, c5 as virtualLocationResolver, c6 as webPageResolver, c7 as webSiteResolver } from './shared/schema-org.DP3Hfenn.js';
+export { schemaAutoImports } from './imports.js';
+export { P as PluginSchemaOrgOptions, U as UnheadSchemaOrg } from './shared/schema-org.Oc0Bt0kO.js';
+export { S as SchemaOrgHeadInput, U as UseSchemaOrgInput, d as defineAddress, a as defineAggregateOffer, b as defineAggregateRating, c as defineArticle, e as defineBook, f as defineBookEdition, g as defineBreadcrumb, h as defineComment, i as defineCourse, j as defineDataset, k as defineEvent, l as defineFoodEstablishment, m as defineHowTo, n as defineHowToStep, o as defineImage, p as defineItemList, q as defineJobPosting, r as defineListItem, s as defineLocalBusiness, t as defineMovie, u as defineMusicAlbum, v as defineMusicGroup, w as defineMusicPlaylist, x as defineMusicRecording, y as defineOffer, z as defineOpeningHours, A as defineOrganization, B as definePerson, C as definePlace, D as definePodcastEpisode, E as definePodcastSeason, F as definePodcastSeries, G as defineProduct, H as defineQuestion, I as defineReadAction, J as defineRecipe, K as defineReview, L as defineSearchAction, M as defineService, N as defineSoftwareApp, O as defineTVEpisode, P as defineTVSeason, Q as defineTVSeries, R as defineVideo, T as defineVirtualLocation, V as defineWebPage, W as defineWebSite, X as normalizeSchemaOrgInput, Y as useSchemaOrg } from './shared/schema-org.D4g1kPFe.js';
+import 'unhead/types';
+
+interface ResolverOptions<ResolvedInput = Thing> {
+    /**
+     * Return single images as an object.
+     */
+    array?: boolean;
+    /**
+     * Move added nodes to the root graph.
+     */
+    root?: boolean;
+    /**
+     * Generates ids for nodes.
+     */
+    generateId?: boolean;
+    afterResolve?: (node: ResolvedInput) => void;
+}
+
+declare function defineSchemaOrgResolver<T extends Thing, CastInput = T>(schema: SchemaOrgNodeDefinition<T, CastInput>): SchemaOrgNodeDefinition<T, CastInput>;
+
+declare function resolveMeta(meta: Partial<MetaInput>): ResolvedMeta;
+declare function resolveNode<ResolvedInput extends Thing, CastInput>(node: CastInput, ctx: SchemaOrgGraph, resolver: SchemaOrgNodeDefinition<ResolvedInput, CastInput>): ResolvedInput;
+declare function resolveNode<T extends Thing>(node: T, ctx: SchemaOrgGraph, resolver?: SchemaOrgNodeDefinition<T>): T;
+declare function resolveNodeId<T extends Thing>(node: T, ctx: SchemaOrgGraph, resolver?: SchemaOrgNodeDefinition<T>, resolveAsRoot?: boolean): T;
+type FalsyRelationInput = '' | 0 | false | null | undefined;
+type RelationValue<Input> = Exclude<Input extends readonly (infer Value)[] ? Value : Input, FalsyRelationInput>;
+type ResolverInput<ResolvedInput extends Thing, CastInput> = CastInput | NodeRelation<ResolvedInput>;
+type RelationInputValue<Input> = Input extends readonly (infer Value)[] ? Value : Input;
+type PossibleFalsy<Input> = ('' extends Input ? '' : never) | (0 extends Input ? 0 : never) | (false extends Input ? false : never) | (null extends Input ? null : never) | (undefined extends Input ? undefined : never);
+type RelationItemResult<Input, ResolvedInput> = [Exclude<Input, FalsyRelationInput>] extends [never] ? Input : NodeRelation<ResolvedInput> | PossibleFalsy<Input>;
+type NaturalRelationResult<Input, ResolvedInput> = Input extends readonly [] ? [] : Input extends readonly [infer Value] ? RelationItemResult<Value, ResolvedInput> : Input extends readonly [unknown, unknown, ...unknown[]] ? RelationItemResult<RelationInputValue<Input>, ResolvedInput>[] : Input extends readonly (infer Value)[] ? RelationItemResult<Value, ResolvedInput> | RelationItemResult<Value, ResolvedInput>[] : RelationItemResult<Input, ResolvedInput>;
+type ArrayRelationResult<Input, ResolvedInput> = RelationItemResult<RelationInputValue<Input>, ResolvedInput>[];
+type ResolveRelationResult<Input, ResolvedInput, Options> = Input extends FalsyRelationInput ? Input : PossibleFalsy<Input> | (Options extends undefined ? NaturalRelationResult<Input, ResolvedInput> : 'array' extends keyof Options ? Options extends {
+    array: true;
+} ? ArrayRelationResult<Input, ResolvedInput> : Options extends {
+    array?: false | undefined;
+} ? NaturalRelationResult<Input, ResolvedInput> : NaturalRelationResult<Input, ResolvedInput> | ArrayRelationResult<Input, ResolvedInput> : NaturalRelationResult<Input, ResolvedInput>);
+type ConstrainedResolverInput<ResolvedInput extends Thing, CastInput> = ResolverInput<ResolvedInput, CastInput> | readonly (ResolverInput<ResolvedInput, CastInput> | FalsyRelationInput)[] | FalsyRelationInput;
+declare function resolveRelation<ResolvedInput extends Thing, CastInput, Input, const Options extends ResolverOptions<ResolvedInput>>(input: Input & ConstrainedResolverInput<NoInfer<ResolvedInput>, NoInfer<CastInput>>, ctx: SchemaOrgGraph, fallbackResolver: SchemaOrgNodeDefinition<ResolvedInput, CastInput>, options: Options): ResolveRelationResult<Input, ResolvedInput, Options>;
+declare function resolveRelation<ResolvedInput extends Thing, CastInput, Input>(input: Input & ConstrainedResolverInput<NoInfer<ResolvedInput>, NoInfer<CastInput>>, ctx: SchemaOrgGraph, fallbackResolver: SchemaOrgNodeDefinition<ResolvedInput, CastInput>): ResolveRelationResult<Input, ResolvedInput, undefined>;
+declare function resolveRelation<ResolvedInput extends Thing, CastInput, Input, const Options extends ResolverOptions<ResolvedInput>>(input: Input & ConstrainedResolverInput<NoInfer<ResolvedInput>, NoInfer<CastInput>>, ctx: SchemaOrgGraph, fallbackResolver: SchemaOrgNodeDefinition<ResolvedInput, CastInput> | undefined, options: Options): ResolveRelationResult<Input, ResolvedInput | RelationValue<Input>, Options>;
+declare function resolveRelation<ResolvedInput extends Thing, CastInput, Input>(input: Input & ConstrainedResolverInput<NoInfer<ResolvedInput>, NoInfer<CastInput>>, ctx: SchemaOrgGraph, fallbackResolver: SchemaOrgNodeDefinition<ResolvedInput, CastInput> | undefined): ResolveRelationResult<Input, ResolvedInput | RelationValue<Input>, undefined>;
+declare function resolveRelation<Input, const Options extends ResolverOptions>(input: Input, ctx: SchemaOrgGraph, fallbackResolver: undefined, options: Options): ResolveRelationResult<Input, RelationValue<Input>, Options>;
+declare function resolveRelation<Input>(input: Input, ctx: SchemaOrgGraph, fallbackResolver?: undefined): ResolveRelationResult<Input, RelationValue<Input>, undefined>;
+
+type MergeValue<T, U> = U extends undefined ? T : T extends readonly (infer TargetItem)[] ? U extends readonly (infer SourceItem)[] ? (TargetItem | SourceItem)[] : (TargetItem | U)[] : T extends object ? U extends object ? U extends readonly unknown[] ? U : Merge<T, U> : U : U;
+type Merge<T extends object, U extends object> = Omit<T, keyof U> & {
+    [Key in keyof U]: Key extends keyof T ? MergeValue<T[Key], U[Key]> : U[Key];
+};
+declare function merge<T extends object, U extends object>(target: T, source: U): Merge<T, U>;
+
+export { MetaInput, NodeRelation, ResolvedMeta, SchemaOrgGraph, SchemaOrgNodeDefinition, Thing, defineSchemaOrgResolver, merge, resolveMeta, resolveNode, resolveNodeId, resolveRelation };
+export type { Merge, ResolverOptions };

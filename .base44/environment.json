@@ -1,0 +1,83 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "FIREBASE_CREDENTIALS",
+      "description": "Firebase service account JSON on a single line: Firebase console -> Project settings -> Service accounts -> Generate new private key. Used by the API for push notifications and to verify login tokens. The sandbox generates a throwaway service account when this is empty so the API can boot, but nothing is actually delivered until a real key is supplied.",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "GCP_PROJECT_ID",
+      "description": "Google Cloud / Firebase project id, must match the project the service account belongs to.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "FIREBASE_API_KEY",
+      "description": "Firebase web app config value apiKey (Firebase console -> Project settings -> General -> Your apps -> Web app). Needed for the web login page.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "FIREBASE_AUTH_DOMAIN",
+      "description": "Firebase web app config value authDomain (same web app config as FIREBASE_API_KEY).",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "FIREBASE_PROJECT_ID",
+      "description": "Firebase web app config value projectId.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "FIREBASE_APP_ID",
+      "description": "Firebase web app config value appId.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "FIREBASE_MESSAGING_SENDER_ID",
+      "description": "Firebase web app config value messagingSenderId.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "FIREBASE_STORAGE_BUCKET",
+      "description": "Firebase web app config value storageBucket.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SMTP_HOST",
+      "description": "SMTP server host used for outgoing email (e.g. smtp.mailtrap.io).",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SMTP_PORT",
+      "description": "SMTP server port (e.g. 2525 for Mailtrap).",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SMTP_USERNAME",
+      "description": "SMTP username from your email provider.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SMTP_PASSWORD",
+      "description": "SMTP password from your email provider.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "SMTP_FROM_EMAIL",
+      "description": "From address for outgoing email, must be allowed by your SMTP provider.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "CLOUDFLARE_TURNSTILE_SECRET_KEY",
+      "description": "Cloudflare Turnstile secret key (Cloudflare dashboard -> Turnstile), validates the captcha on message search.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "CLOUDFLARE_TURNSTILE_SITE_KEY",
+      "description": "Cloudflare Turnstile site key for the same widget, used by the web search page.",
+      "requiredAtBoot": false
+    }
+  ]
+}

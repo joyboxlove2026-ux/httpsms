@@ -1,0 +1,18 @@
+import { useRuntimeConfig } from "#nuxtseo/nitro";
+import staticConfig from "#sitemap-virtual/static-config.mjs";
+import { normalizeRuntimeFilters } from "../utils-pure.js";
+export * from "../utils-pure.js";
+export function useSitemapRuntimeConfig(e) {
+  const sitemaps = Object.fromEntries(
+    Object.entries(staticConfig.sitemaps).map(([name, sitemap]) => [name, {
+      ...sitemap,
+      include: normalizeRuntimeFilters("include" in sitemap ? sitemap.include : void 0),
+      exclude: normalizeRuntimeFilters("exclude" in sitemap ? sitemap.exclude : void 0)
+    }])
+  );
+  return Object.freeze({
+    ...staticConfig,
+    sitemaps,
+    ...useRuntimeConfig(e).sitemap
+  });
+}
